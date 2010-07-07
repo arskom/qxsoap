@@ -1,0 +1,8 @@
+
+# Netbeans cruft
+nbproject
+
+# Python cruft
+*.pyc
+*.pyo
+
