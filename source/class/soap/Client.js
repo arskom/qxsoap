@@ -367,9 +367,10 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
         ,__extract : function(node, simple, parent_defn) {
             var retval = null;
-            var _ns_xsd = "http://www.w3.org/2001/XMLSchema";
+            var _ns_xsd = "http://www.w3.org/1999/XMLSchema";
+            var _ns_xsi = "http://www.w3.org/1999/XMLSchema-instance";
 
-            var is_null = node.getAttribute("xs:nil");
+            var is_null = node.getAttribute("xsi:nil");
             if (is_null == "1") {
                 return null;
             }
