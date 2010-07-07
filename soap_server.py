@@ -243,8 +243,8 @@ class HelloWorldService(SimpleWSGIApp):
 
         return retval
 
-    @rpc(_returns=Integer)
-    def get_integers_count(self):
+    @rpc(SOAPRequest, _returns=Integer)
+    def get_integers_count(self, req):
         return self.maxIntegerSize
 
     @rpc(_returns=String)
