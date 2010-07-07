@@ -49,7 +49,7 @@ from soaplib.serializers.primitive import String
 from soaplib.service import rpc
 from soaplib.wsgi_soap import SimpleWSGIApp
 
-staticFolder='/static/'
+static_folder='/static/'
 class BasicWebServiceDaemon:
     from cherrypy.wsgiserver import CherryPyWSGIServer
 
@@ -58,8 +58,8 @@ class BasicWebServiceDaemon:
 
     def runbasic(self, func, server_address):
         """
-        Runs a simple HTTP server hosting WSGI app `func`. The directory "staticFolder" 
-        is hosted statically.
+        Runs a simple HTTP server hosting WSGI app `func`. The directory
+        "static_folder" is hosted statically.
 
         Based on [WsgiServer][ws] from [Colin Stewart][cs].
 
@@ -147,7 +147,8 @@ class BasicWebServiceDaemon:
             do_DELETE = run_wsgi_app
     
             def do_GET(self):
-                if self.path.startswith(staticFolder):
+                if self.path.startswith(static_folder):
+                    self.path = '/'+'/'.join(self.path.split('/')[2:])
                     SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
                 else:
                     self.run_wsgi_app()
