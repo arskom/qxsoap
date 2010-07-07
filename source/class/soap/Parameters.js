@@ -162,11 +162,16 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
         }
 
         ,add : function(name, value) {
-            if (value == null || value == undefined) {
+            if (value == null || value + "" == "undefined") {
                 return this;
             }
+            
             this.__pl[name] = value;
             return this;
+        }
+
+        ,get_argument : function(name) {
+            return this.__pl[name];
         }
 
         ,to_xml : function(doc, parent, tns) {
