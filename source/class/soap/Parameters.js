@@ -39,9 +39,10 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             var t = typeof(value);
             var child;
             var _ns_xsd = "http://www.w3.org/2001/XMLSchema"
+            var _ns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
             if (value == null) {
-                soap.Client.setAttributeNS(doc, parent, "xs:nil", _ns_xsd, 1);
+                soap.Client.setAttributeNS(doc, parent, "xsi:nil", _ns_xsi, 1);
             }
             else if (t == "string") {
                 parent.appendChild(doc.createTextNode(value)); 
