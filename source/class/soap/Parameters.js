@@ -35,17 +35,15 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
     ,members : {
         __pl : null
 
-        ,__serialize : function(doc, parent, value, tns) {
+        ,__serialize : function(doc, parent, value, cache) {
             var t = typeof(value);
             var child;
             var _ns_xsd = "http://www.w3.org/2001/XMLSchema"
 
             if (value == null) {
-                soap.Client.setAttributeNS(
-                                             doc, parent, "xs:nil", _ns_xsd, 1);
+                soap.Client.setAttributeNS(doc, parent, "xs:nil", _ns_xsd, 1);
             }
             else if (t == "string") {
-                //value = qx.xml.String.escape(value)));
                 parent.appendChild(doc.createTextNode(value)); 
             }
 
@@ -106,6 +104,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                         if(!isNaN(name)) { // contiguous array
                             for (var i = 0; i<value.length; ++i) {
                                 var type=null;
+
                                 if (value[i].basename) {
                                     type = value[i].basename;
                                 }
@@ -126,14 +125,14 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                                 }
 
                                 child = soap.Client.createSubElementNS(
-                                                           doc,parent,type,tns);
+                                           doc,parent,type,parent.namespaceURI);
                                 this.__serialize(doc, child, value[i]);
                             }
                             break;
                         }
                         else { // associative array
                             child = soap.Client.createSubElementNS(doc,
-                                                             parent, name, tns);
+                                             parent, name, parent.namespaceURI);
                             this.__serialize(doc, child, value[name]);
                         }
                     }
@@ -149,11 +148,11 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                             var getter = "get" + k;
                             var data = value[getter]();
 
-                            //var ns = eval(value.classname).TYPE_DEFINITION.ns;
+                            var ns = eval(value.classname).TYPE_DEFINITION.ns;
 
                             var key = k.slice(1);
                             child = soap.Client.createSubElementNS(doc,
-                                                               parent, key, tns);
+                                                               parent, key, ns);
                             this.__serialize(doc, child, data);
                         }
                     }
@@ -174,17 +173,16 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             return this.__pl[name];
         }
 
-        ,to_xml : function(doc, parent, tns) {
+        ,to_xml : function(doc, parent, cache) {
             for(var name in this.__pl) {
-                
                 switch(typeof(this.__pl[name])) {
                 case "string":
                 case "number":
-                case "boolean":
                 case "object":
-                    var child = doc.createElement(name);
-                    parent.appendChild(child);
-                    this.__serialize(doc, child, this.__pl[name], tns);
+                case "boolean":
+                    var child = soap.Client.createSubElementNS(doc, parent,
+                                            name, cache.get_target_namespace());
+                    this.__serialize(doc, child, this.__pl[name], cache);
                     break;
 
                 default:

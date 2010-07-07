@@ -570,11 +570,10 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             // build SOAP request
             var doc = qx.xml.Document.create()
             var envelope = sub_element(doc, doc,"Envelope", _ns_soap);
-            envelope.setAttribute("xmlns", this.cache.get_target_namespace());
 
             var body = sub_element(doc, envelope, "Body", _ns_soap);
             var call = sub_element(doc, body, method_, _ns_tns);
-            parameters.to_xml(doc, call, _ns_tns);
+            parameters.to_xml(doc, call, this.cache);
 
             // send request
             var xmlHttp = qx.io.remote.transport.XmlHttp.createRequestObject();
