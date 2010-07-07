@@ -77,24 +77,25 @@ class BasicWebServiceDaemon:
                     urlparse.urlparse('http://dummyhost%s' % self.path)
     
                 # we only use path, query
-                env = { 'wsgi.version': (1, 0)
-                    ,'wsgi.url_scheme': 'http'
-                    ,'wsgi.input': self.rfile
-                    ,'wsgi.errors': sys.stderr
-                    ,'wsgi.multithread': 1
-                    ,'wsgi.multiprocess': 0
-                    ,'wsgi.run_once': 0
-                    ,'REQUEST_METHOD': self.command
-                    ,'REQUEST_URI': self.path
-                    ,'PATH_INFO': path
-                    ,'QUERY_STRING': query
-                    ,'CONTENT_TYPE': self.headers.get('Content-Type', '')
-                    ,'CONTENT_LENGTH': self.headers.get('Content-Length', '')
-                    ,'REMOTE_ADDR': self.client_address[0]
-                    ,'SERVER_NAME': self.server.server_address[0]
-                    ,'SERVER_PORT': str(self.server.server_address[1])
-                    ,'SERVER_PROTOCOL': self.request_version
-                    }
+                env = {
+                    'wsgi.version': (1, 0),
+                    'wsgi.url_scheme': 'http',
+                    'wsgi.input': self.rfile,
+                    'wsgi.errors': sys.stderr,
+                    'wsgi.multithread': 1,
+                    'wsgi.multiprocess': 0,
+                    'wsgi.run_once': 0,
+                    'REQUEST_METHOD': self.command,
+                    'REQUEST_URI': self.path,
+                    'PATH_INFO': path,
+                    'QUERY_STRING': query,
+                    'CONTENT_TYPE': self.headers.get('Content-Type', ''),
+                    'CONTENT_LENGTH': self.headers.get('Content-Length', ''),
+                    'REMOTE_ADDR': self.client_address[0],
+                    'SERVER_NAME': self.server.server_address[0],
+                    'SERVER_PORT': str(self.server.server_address[1]),
+                    'SERVER_PROTOCOL': self.request_version,
+                }
     
                 for http_header, http_value in self.headers.items():
                     env ['HTTP_%s' % http_header.replace('-', '_').upper()] = http_value
