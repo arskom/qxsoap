@@ -29,36 +29,22 @@
 qx.Class.define("soap.RemoteImpl", { extend : qx.ui.table.model.Remote
     ,include : [qx.locale.MTranslation]
 
-    ,construct : function(service_instance, row_count_method_name,
-                  row_data_method_name, service_arguments, session_id, mapper) {
-                      
+    ,construct : function(soap_client, row_count_method_name,
+                  row_data_method_name, args, mapper) {
         this.base(arguments);
-        this.setRowCountMethodName(row_count_method_name);
-        this.setRowDataMethodName(row_data_method_name);
-        this.setServiceInstance(service_instance);
-        this.setServiceArguments(service_arguments);
 
-        if (session_id + "" != "undefined") {
-            this.setSessionId(session_id)
-        }
-        else {
-            this.setSessionId("");
-        }
-        if (mapper + "" != "undefined") {
+        this.__soap_client = soap_client;
+        this.__count_method_name = row_count_method_name;
+        this.__data_method_name = row_data_method_name;
+        this.__args = args;
+
+        if (mapper) {
             this.setMapper(mapper);
-        }
-        else {
-            this.setMapper(null);
         }
     }
 
     ,properties : {
-         mapper: { check: "Function", init: null, nullable: true }
-        ,sessionId: { check: "String", init: null }
-        ,serviceInstance: { check: "soap.Client", nullable: false }
-        ,serviceArguments: { check: "soap.Parameters", nullable: false }
-        ,rowDataMethodName: { check: "String", nullable: false}
-        ,rowCountMethodName: { check: "String", nullable: false}
+        mapper: { check: "Function", init: null, nullable: true }
     }
 
     ,events : {
@@ -66,56 +52,48 @@ qx.Class.define("soap.RemoteImpl", { extend : qx.ui.table.model.Remote
     }
 
     ,members : {
-         __count_request_sent : false
-
+         __soap_client: null
+        ,__row_count_method_name: null
+        ,__row_data_method_name: null
+        ,__args: null
         ,_loadRowCount : function() {
             var ctx = this;
-            var svc = ctx.getServiceInstance();
+            var svc = ctx.__soap_client;
+            var args = ctx.__args;
 
-            if (ctx.__count_request_sent) {
-                return;
-            }
-            else {
-                ctx.__count_request_sent = true;
-            }
-
-            var params = this.getServiceArguments();
-
-            ctx.SoapRunning = svc.callAsync(this.getRowCountMethodName(), params,
+            svc.callAsync(this.__count_method_name, args,
                 true, function(r) {
-                    ctx.SoapRunning = null;
-                    ctx.__count_request_sent = false;
                     ctx._onRowCountLoaded(r);
                 });
         }
 
-        ,_loadRowData : function(firstRow, lastRow) {
-            var ctx=this;
-            var svc = ctx.getServiceInstance();
-            var params = ctx.getServiceArguments();
+        ,_loadRowData : function(first_row, last_row) {
+            var ctx = this;
+            var svc = ctx.__soap_client;
+            var args = ctx.__args;
 
             // construct request object
-            var request = svc.get_object("HelloWorldService.HelloWorldService", "SOAPRequest");
+            var req = args.get_argument("req");
 
-            var sort_column_index = this.getSortColumnIndex() != -1 ?
-                                                  this.getSortColumnIndex() : 0;
+            var sort_column_index = (this.getSortColumnIndex() != -1 ?
+                                                 this.getSortColumnIndex() : 0);
 
             var sort_order = this.isSortAscending() ? "d" : "a";
 
-            request.set_who(this.getSessionId());
-            request.set_sort_by(sort_column_index);
-            request.set_sort_ord(sort_order);
-            request.set_startrow(firstRow);
-            params.add("req",request);
+            req.set_sort_by(sort_column_index);
+            req.set_sort_ord(sort_order);
+            req.set_startrow(first_row);
+            args.add("req",req);
 
             // issue soap call
-            ctx.SoapRunning = svc.callAsync( this.getRowDataMethodName(), params,
+            svc.callAsync(this.__data_method_name, args,
                 true, function(r) {
-                    r._start_row = firstRow;
-                    ctx.SoapRunning = null;
+                    r._start_row = first_row;
+
                     if (ctx.getMapper() != null) {
                         ctx.getMapper()(r);
                     }
+
                     ctx._onRowDataLoaded(r);
                     ctx.fireDataEvent("dataLoaded",r);
                 });
@@ -124,7 +102,6 @@ qx.Class.define("soap.RemoteImpl", { extend : qx.ui.table.model.Remote
         // overridden
         ,getValue : function(columnIndex, rowIndex) {
             var rowData = this.getRowData(rowIndex);
-
             var retval=null;
 
             if (rowData != null) {
