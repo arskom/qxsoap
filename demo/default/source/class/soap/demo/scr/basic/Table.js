@@ -32,13 +32,18 @@ qx.Class.define("soap.demo.scr.basic.Table", { extend : qx.core.Object
     }
     ,construct : function(container) {
         this.base(arguments);
-        var ctx=this;
 
-        var lv = new qx.ui.container.Composite(new qx.ui.layout.VBox());
-        this.setWidget(lv);
+        var ctx=this;
+        var svc = soap.demo.Application.cliSvc;
+
+        var req = svc.get_object("HelloWorldService.HelloWorldService","SOAPRequest");
 
         var params = new soap.Parameters();
-        var tableModel = new soap.RemoteImpl(soap.demo.Application.cliSvc, "get_integers_count", "get_integers", params);
+        params.add('req', req);
+
+        var tableModel = new soap.RemoteImpl(svc,
+            "get_integers_count", "get_integers", params);
+
         tableModel.setColumns( ["By One", "By Two", "By Three", "By Four", "By Five"]
                               ,["byone",  "bytwo",  "bythree",  "byfour",  "byfive"]);
 
@@ -63,6 +68,10 @@ qx.Class.define("soap.demo.scr.basic.Table", { extend : qx.core.Object
         table.setMaxWidth(500);
         table.setMinWidth(500);
         table.setTableModel(tableModel);
+
+        var lv = new qx.ui.container.Composite(new qx.ui.layout.VBox());
+        this.setWidget(lv);
+
         lv.add(table, {flex:1});
     }
 });
