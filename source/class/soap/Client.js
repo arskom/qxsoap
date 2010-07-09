@@ -178,10 +178,10 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                                                   "' is not exposed via wsdl.");
             }
 
-            /* callback ve errback atamalarını tamamla:
-             * son argüman bir fonksiyon ise, o callback oluyor.
-             * eğer son argümandan bir önceki argüman da fonksiyon ise
-             * sondan bir önceki callback, sonuncu ise errback oluyor.
+            /* this block completes callback and errback assignments:
+             * if the last argument is a function, is the callback.
+             * if the last two arguments are functions, the last one is the
+             * errback and the one before that is the callback.
              */
             var l = arguments.length;
             var callback, errback;
