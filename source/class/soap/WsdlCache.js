@@ -114,19 +114,28 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                 var elt = this.__type_from_node(cn[j]);
                 elt.ns = schema_tns;
                 if (tn == "xs:element") {
-                    schema.element[elt.name] = elt
+                    //schema.element[elt.name] = elt
                 }
                 else if (tn == "xs:import") {
 
                 }
                 else if (tn == "xs:simpleType") {
+                    schema.simple[elt.name] = elt
 
+                    for (var n = cn[j].firstChild; n != null; n=n.nextSibling) {
+                        if (n.nodeName == 'xs:restriction') {
+                            elt.base = n.getAttribute("base");
+                            elt.restrictions = new Object();
+                            for (var r = n.firstChild; r != null; r=r.nextSibling) {
+                                // TODO: fill restrictions
+                            }
+                        }
+                    }
                 }
                 else if (tn == "xs:complexType") {
                     elt.children = new Object();
                     var first_node = cn[j].childNodes[0];
                     var child;
-                    var child_pref;
 
                     if (first_node.hasChildNodes()) {
                         first_node = first_node.childNodes[0];
@@ -179,6 +188,14 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             
             elt.type = node.getAttribute("type");
             elt.name = node.getAttribute("name");
+            if (elt.type) {
+                elt.ns = soap.Client.type_qname_to_ns(node, elt.type);
+            }
+            else {
+                elt.ns = node.parentNode.getAttribute("targetNamespace")
+            }
+
+            elt.base = null;
 
             return elt;
         }
@@ -230,7 +247,10 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                                 && children.hasOwnProperty(k)
                                 && isNaN(k) ) {
 
-                        var type_name = child.type.split(":")[1];
+                        var type_name = child.type;
+                        var type_ns = child.ns;
+                        var type_local = type_name.split(":")[1];
+
                         var prop_type;
 
                         var TYPE_MAP = soap.Client.TYPE_MAP;
