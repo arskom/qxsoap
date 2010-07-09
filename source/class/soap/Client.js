@@ -40,7 +40,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
     }
 
     ,properties : {
-        url : {check : "String"}
+        _url : {check : "String"}
     }
 
     ,statics : {
@@ -130,7 +130,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
                 */
 
-                // the "x prefix has no importance. when there's a conflict,
+                // the "x" prefix has no importance. when there's a conflict,
                 // mozilla engine assigns an alternative prefix automatically.
                 // not putting a prefix means to assign default namespace prefix
                 // to the given namespace uri.
@@ -574,28 +574,28 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             parameters.to_xml(doc, call, this.cache);
 
             // send request
-            var xmlHttp = qx.io.remote.transport.XmlHttp.createRequestObject();
-            xmlHttp.open("POST", this.get_url(), async);
+            var xml_http = qx.io.remote.transport.XmlHttp.createRequestObject();
+            xml_http.open("POST", this.get_url(), async);
 
             var soapaction = ((_ns_tns.lastIndexOf("/") != _ns_tns.length - 1) ?
                                              _ns_tns + "/" : _ns_tns) + method_;
-            xmlHttp.setRequestHeader("SOAPAction", soapaction);
-            xmlHttp.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+            xml_http.setRequestHeader("SOAPAction", soapaction);
+            xml_http.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
 
             if(async) {
                 var ctx = this;
-                xmlHttp.onreadystatechange = function() {
-                    if(xmlHttp.readyState == 4) { /* FIXME: No magic numbers! */
+                xml_http.onreadystatechange = function() {
+                    if(xml_http.readyState == 4) { /* FIXME: No magic numbers! */
                         ctx.__on_send_soap_request(method_, async, simple,
-                                                    callback, errback, xmlHttp);
+                                                    callback, errback, xml_http);
                     }
                 }
             }
 
-            xmlHttp.send(qx.xml.Element.serialize(doc));
+            xml_http.send(qx.xml.Element.serialize(doc));
             if (!async) {
                 retval = this.__on_send_soap_request(method_, async, simple,
-                                                    callback, errback, xmlHttp);
+                                                    callback, errback, xml_http);
             }
 
             return retval;
