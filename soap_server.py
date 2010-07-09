@@ -49,6 +49,15 @@ from soaplib.serializers.primitive import String
 from soaplib.service import rpc
 from soaplib.wsgi_soap import SimpleWSGIApp
 
+import logging
+logger = logging.getLogger('soaplib')
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
 static_folder='/static/'
 class BasicWebServiceDaemon:
     from cherrypy.wsgiserver import CherryPyWSGIServer
