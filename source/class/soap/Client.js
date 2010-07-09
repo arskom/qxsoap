@@ -31,7 +31,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
     ,construct : function(url) {
         this.base(arguments);
 
-        this.setUrl(url)
+        this.set_url(url)
     }
 
     ,events : {
@@ -40,9 +40,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
     }
 
     ,properties : {
-         timeout :          {check : "Integer", nullable : true}
-        ,crossDomain :      {check : "Boolean", init : false}
-        ,url :              {check : "String",  nullable : true}
+        url : {check : "String"}
     }
 
     ,statics : {
@@ -172,7 +170,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
             if(this.cache == null) {
                 var xhr = qx.io.remote.transport.XmlHttp.createRequestObject();
-                xhr.open("GET", this.getUrl() + "?wsdl", true);
+                xhr.open("GET", this.get_url() + "?wsdl", true);
 
                 xhr.onreadystatechange = function() {
                     if(xhr.readyState == 4) {
@@ -368,7 +366,6 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
         ,__extract : function(node, simple, parent_defn) {
             var retval = null;
             var _ns_xsd = "http://www.w3.org/2001/XMLSchema";
-            var _ns_xsi = "http://www.w3.org/2001/XMLSchema-instance";
 
             var is_null = node.getAttribute("xsi:nil");
             if (is_null == "true") {
@@ -518,7 +515,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             
             if(this.cache == null) {
                 var xmlHttp = qx.io.remote.transport.XmlHttp.createRequestObject();
-                xmlHttp.open("GET", this.getUrl() + "?wsdl", async);
+                xmlHttp.open("GET", this.get_url() + "?wsdl", async);
                 if(async) {
                     var ctx=this;
                     xmlHttp.onreadystatechange = function() {
@@ -578,7 +575,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
             // send request
             var xmlHttp = qx.io.remote.transport.XmlHttp.createRequestObject();
-            xmlHttp.open("POST", this.getUrl(), async);
+            xmlHttp.open("POST", this.get_url(), async);
 
             var soapaction = ((_ns_tns.lastIndexOf("/") != _ns_tns.length - 1) ?
                                              _ns_tns + "/" : _ns_tns) + method_;
