@@ -204,6 +204,10 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             return this.__target_namespace;
         }
 
+        ,__is_child_of_basic_type : function(type) {
+
+        }
+
         ,get_class_map: function(object_namespace, object_name) {
             var ctx=this;
             var retval;
@@ -254,8 +258,8 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                         var prop_type;
 
                         var TYPE_MAP = soap.Client.TYPE_MAP;
-                        if (type_name in TYPE_MAP) {
-                            prop_type = TYPE_MAP[type_name];
+                        if (type_local in TYPE_MAP) {
+                            prop_type = TYPE_MAP[type_local];
                         }
                         else if (child.is_array) {
                             prop_type = "Array";
