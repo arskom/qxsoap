@@ -378,30 +378,44 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             var type_local = type_name.split(":")[1];
             var type_local_l = type_local.toLowerCase();
 
+            if (type_local_l != "string" && value == "") {
+                return null;
+            }
+
             if (type_ns == _ns_xsd) {
                 var value = node.nodeValue;
                 if (value == null) {
-                    value = node.childNodes[0].nodeValue; // this is to get the textNode
+                    var first_child = node.firstChild;
+                    if (first_child == null) {
+                        value = "";
+                    }
+                    else {
+                        value = first_child.nodeValue; // this is to get the textNode
+                    }
                 }
 
-                if (type_local_l == "boolean") {
+                if (type_local_l != "string" && value === "") {
+                    retval = null;
+                }
+                else if (type_local_l == "boolean") {
                     retval = value + "" == "true";
                 }
                 else if (type_local_l == "int" || type_local_l == "long"
-                      || type_local_l == "integer") {
+                            || type_local_l == "integer") {
                     retval = (value != null) ? parseInt(value + "", 10) : 0;
                 }
                 else if (type_local_l == "double" || type_local_l == "float") {
                     retval = (value != null) ? parseFloat(value + "") : 0.0;
                 }
                 else if (type_local_l == "datetime") {
-                    if(value != null) {
+                    if (value != null) {
                         value = value + "";
                         value = value.substring(0, (
                             value.lastIndexOf(".") == -1 ? (
                                 value.lastIndexOf("+") == -1 ?
                                 value.length :
-                                value.lastIndexOf("+")) :
+                                value.lastIndexOf("+")
+                            ) :
                             value.lastIndexOf(".")));
 
                         value = value.replace(/T/gi," ");
