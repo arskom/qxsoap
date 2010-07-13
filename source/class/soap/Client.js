@@ -88,6 +88,10 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 }
             }
 
+            qx.core.Assert.assertNotEquals(retval, null,
+                        "Unable to deduce namespace of '" + type_qname +
+                                                            "' from xml file!");
+
             return retval;
         }
 
