@@ -216,16 +216,15 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             }
 
             var args = new soap.Parameters();
-            for (var i=1, j=0; i<l; ++j) {
-                var child_type = method_input.children[j];
+            for (var i=1; i<l; ++i) {
+                var child_type = method_input.children[i];
 
                 if (! child_type) {
                     throw new Error("Too many arguments for function '"
                                                               +method_name+"'");
                 }
 
-                args.add(method_input.children[j].name, arguments[i]);
-                 ++i;
+                args.add(method_input.children[i].name, arguments[i]);
             }
 
             return this.__invoke(method_name, args, true, false, callback,
