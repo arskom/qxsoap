@@ -113,6 +113,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     for (var n = cn[j].firstChild; n != null; n=n.nextSibling) {
                         if (n.nodeName == 'xs:restriction') {
                             elt.base = n.getAttribute("base");
+                            elt.base_ns = soap.Client.type_qname_to_ns(n,elt.base);
                             elt.restrictions = new Object();
                             for (var r = n.firstChild; r != null; r=r.nextSibling) {
                                 // TODO: fill restrictions
@@ -171,7 +172,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ,schema : null
         ,definitions : null
 
-        ,__type_from_node : function(node) {
+        ,__type_from_node: function(node) {
             var elt = new Object();
             
             elt.type = node.getAttribute("type");
@@ -192,8 +193,42 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             return this.__target_namespace;
         }
 
-        ,__is_child_of_basic_type : function(type) {
+        ,__get_simple_base : function(child) {
+            var retval;
+            var type_l = child.type.split(":")[1];
+            var simple_type = this.schema[child.ns].simple[type_l];
 
+            if (simple_type) {
+                while (simple_type.base != null) {
+                    var base_ns = this.schema[simple_type.base_ns]
+                    if (base_ns) {
+                        var base_l = simple_type.base.split(":")[1];
+                        simple_type = base_ns.simple[base_l];
+
+                        qx.core.Assert.assertNotUndefined(
+                            simple_type,
+                            "Simple Type " +
+                            "'{" + simple_type.base_ns + "}'" +
+                            " '" + simple_type.base + "' " +
+                            "does not exist");
+                    }
+                    else {
+                        base_ns = null;
+                        break;
+                    }
+                }
+
+                if (base_ns) {
+                    retval = simple_type.type.split(":")[1];
+                }
+                else {
+                    retval = simple_type.base.split(":")[1];
+                }
+
+                retval = soap.Client.TYPE_MAP[retval];
+            }
+
+            return retval;
         }
 
         ,get_class_map: function(object_namespace, object_name) {
@@ -215,8 +250,6 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             }
 
             var type = schema.complex[object_name];
-            type.ns = object_namespace;
-            
             if (! type) {
                 qx.log.Logger.debug("'" + object_name + "' not found!");
             }
@@ -236,23 +269,24 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     var child = children[k];
                     var prop_name = "_" + child.name;
                     if ( (! (prop_name in props))
-                                && children.hasOwnProperty(k)
-                                && isNaN(k) ) {
+                                    && children.hasOwnProperty(k)
+                                    && isNaN(k) ) {
 
-                        var type_name = child.type;
-                        var type_ns = child.ns;
-                        var type_local = type_name.split(":")[1];
+                        var type_l = child.type.split(":")[1];
 
                         var prop_type;
-
-                        var TYPE_MAP = soap.Client.TYPE_MAP;
-                        if (type_local in TYPE_MAP) {
-                            prop_type = TYPE_MAP[type_local];
-                        }
-                        else if (child.is_array) {
+                        if (child.is_array) {
                             prop_type = "Array";
                         }
                         else {
+                            prop_type = soap.Client.TYPE_MAP[type_l];
+                        }
+
+                        if (! prop_type) {
+                            prop_type = this.__get_simple_base(child);
+                        }
+
+                        if (! prop_type) {
                             prop_type = "Object";
                         }
 
