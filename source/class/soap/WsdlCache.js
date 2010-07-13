@@ -33,19 +33,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ,_name : {check: "String"}
         ,_simple : {check: "Boolean", init:false}
     }
-    ,statics : {
-        PRIMITIVE_DEFAULTS : {
-             "Boolean": qx.ui.form.CheckBox
-            ,"Integer": qx.ui.form.TextField
 
-            ,"Double": qx.ui.form.TextField
-            ,"Float": qx.ui.form.TextField
-
-            ,"Date": qx.ui.form.DateField
-            ,"String" : qx.ui.form.TextField
-            ,"Document": qx.ui.form.TextArea
-        }
-    }
     ,construct: function(node) {
         var ctx = this;
         var get_elts = qx.xml.Element.getElementsByTagNameNS;
