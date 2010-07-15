@@ -1,10 +1,10 @@
 #!/usr/bin/python -Ot
 
-# 
-# Copyright (c) 2008-2009, Burak Arslan (burak.arslan-qx@arskom.com.tr) 
+#
+# Copyright (c) 2008-2009, Burak Arslan (burak.arslan-qx@arskom.com.tr)
 # and others.
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright
@@ -15,7 +15,7 @@
 #     * Neither the name of the Arskom Consultancy Ltd. nor the
 #       names of its contributors may be used to endorse or promote products
 #       derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY Burak Arslan ''AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -84,7 +84,7 @@ class BasicWebServiceDaemon:
             def run_wsgi_app(self):
                 protocol, host, path, parameters, query, fragment = \
                     urlparse.urlparse('http://dummyhost%s' % self.path)
-    
+
                 # we only use path, query
                 env = {
                     'wsgi.version': (1, 0),
@@ -105,14 +105,14 @@ class BasicWebServiceDaemon:
                     'SERVER_PORT': str(self.server.server_address[1]),
                     'SERVER_PROTOCOL': self.request_version,
                 }
-    
+
                 for http_header, http_value in self.headers.items():
                     env ['HTTP_%s' % http_header.replace('-', '_').upper()] = http_value
-    
+
                 # Setup the state
                 self.wsgi_sent_headers = 0
                 self.wsgi_headers = []
-    
+
                 try:
                     # We have there environment, now invoke the application
                     called=False
@@ -133,44 +133,44 @@ class BasicWebServiceDaemon:
                     try:
                         try:
                             for data in result:
-                                if data: 
+                                if data:
                                     self.wsgi_write_data(data)
                         finally:
-                            if hasattr(result, 'close'): 
+                            if hasattr(result, 'close'):
                                 result.close()
                     except socket.error, socket_err:
                         # Catch common network errors and suppress them
-                        if (socket_err.args[0] in (errno.ECONNABORTED, errno.EPIPE)): 
+                        if (socket_err.args[0] in (errno.ECONNABORTED, errno.EPIPE)):
                             return
-                    except socket.timeout, socket_timeout: 
+                    except socket.timeout, socket_timeout:
                         return
                 except Exception,e:
                     print traceback.format_exc(),
-    
+
                 if (not self.wsgi_sent_headers):
                     # We must write out something!
                     self.wsgi_write_data(" ")
                 return
-    
+
             do_POST = run_wsgi_app
             do_PUT = run_wsgi_app
             do_DELETE = run_wsgi_app
-    
+
             def do_GET(self):
                 if self.path.startswith(static_folder):
                     self.path = '/'+'/'.join(self.path.split('/')[2:])
                     SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
                 else:
                     self.run_wsgi_app()
-    
-            def wsgi_start_response(self, response_status, response_headers, 
+
+            def wsgi_start_response(self, response_status, response_headers,
                                 exc_info=None):
                 if (self.wsgi_sent_headers):
                     raise Exception("Headers already sent and start_response called again!")
                 # Should really take a copy to avoid changes in the application....
                 self.wsgi_headers = (response_status, response_headers)
                 return self.wsgi_write_data
-    
+
             def wsgi_write_data(self, data):
                 if (not self.wsgi_sent_headers):
                     status, headers = self.wsgi_headers
@@ -184,16 +184,16 @@ class BasicWebServiceDaemon:
                     self.wsgi_sent_headers = 1
                 # Send the data
                 self.wfile.write(data)
-                
+
         class WSGIServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
             def __init__(self, func, server_address):
                 BaseHTTPServer.HTTPServer.__init__(self, server_address, WSGIHandler)
                 self.app = func
                 self.serverShuttingDown = 0
-    
+
         print "http://%s:%d/" % server_address
         WSGIServer(func, server_address).serve_forever()
-    
+
 class SOAPRequest(ClassSerializer):
     startrow = Integer
     startid = Integer
@@ -280,7 +280,7 @@ class HelloWorldService(SimpleWSGIApp):
 if __name__=='__main__':
     l=[ ('/svc/', HelloWorldService()),
         ('/svc.wsdl', HelloWorldService()) ]
-    
+
     print 'cwd is %s' % os.getcwd()
     if os.getcwd() != sys.path[0]:
         os.chdir(sys.path[0])

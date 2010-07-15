@@ -52,7 +52,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
             ,"double": "Double"
             ,"float": "Float"
-            
+
             ,"datetime": "Date"
             ,"string" : "String"
             ,"anytype": "Document"
@@ -163,7 +163,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
         ,get_object: function(object_namespace, object_name) {
             return this.cache.get_object(object_namespace, object_name);
         }
-        
+
         ,easy : function (method_name) {
             if (! method_name) {
                 throw new Error("method_name must be defined!");
@@ -341,7 +341,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             var retval;
             var type_qname = this.__get_type_name_from_node(node)
             retval = soap.Client.type_qname_to_ns(node, type_qname);
-            
+
             if (retval == null) {
                 retval = node.namespaceURI;
             }
@@ -377,7 +377,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
             var type_name = this.__get_type_name_from_node(node);
             var type_ns = this.__get_ns_from_node(node);
-            
+
             var type_local = type_name.split(":")[1];
             var type_local_l = type_local.toLowerCase();
 
@@ -512,7 +512,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
         ,__invoke : function(method_name, parameters, async, simple, callback,
                                                                       errback) {
             var retval;
-            
+
             if(async) {
                 this.__load_wsdl(method_name, parameters, async, simple,
                                                              callback, errback);
@@ -529,7 +529,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
         ,__load_wsdl : function(method_, parameters, async, simple, callback,
                                                                       errback) {
             var retval;
-            
+
             if(this.cache == null) {
                 var xmlHttp = qx.io.remote.transport.XmlHttp.createRequestObject();
                 xmlHttp.open("GET", this.get_url() + "?wsdl", async);
@@ -537,7 +537,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     var ctx=this;
                     xmlHttp.onreadystatechange = function() {
                         if(xmlHttp.readyState == 4) {
-                            ctx.__on_load_wsdl(method_, parameters, async, 
+                            ctx.__on_load_wsdl(method_, parameters, async,
                                             simple, callback, errback, xmlHttp);
                         }
                     }
@@ -545,12 +545,12 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
                 xmlHttp.send(null);
                 if (!async) {
-                    retval = this.__on_load_wsdl(method_, parameters, async, 
+                    retval = this.__on_load_wsdl(method_, parameters, async,
                                         simple, callback, errback, xmlHttp);
                 }
             }
             else {
-                retval = this.__send_soap_request(method_, parameters, async, 
+                retval = this.__send_soap_request(method_, parameters, async,
                                                     simple, callback, errback);
             }
 

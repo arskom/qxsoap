@@ -1,15 +1,15 @@
 {
-  "info" : 
+  "info" :
   {
     "name" : "soap Demo",
 
     "summary" : "soap Demo",
     "description" : "This is a skeleton for a qooxdoo contribution demo.",
-    
+
     "homepage" : "http://demo.qooxdoo.org/contrib/soap",
 
     "license" : "LGPL/EPL",
-    "authors" : 
+    "authors" :
     [
       {
         "name" : "First Author (uid)",
@@ -20,8 +20,8 @@
     "version" : "trunk",
     "qooxdoo-versions": ["1.0-beta1"]
   },
-  
-  "provides" : 
+
+  "provides" :
   {
     "namespace"   : "soap.demo",
     "encoding"    : "utf-8",

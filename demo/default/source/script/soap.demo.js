@@ -3,7 +3,7 @@
 if (!window.qx) window.qx = {};
 
 qx.$$start = new Date();
-  
+
 if (!window.qxsettings) qxsettings = {};
 var settings = {"qx.application":"soap.demo.Application","qx.theme":"soap.demo.theme.Theme","qx.version":"1.1"};
 for (var k in settings) qxsettings[k] = settings[k];
@@ -29,7 +29,7 @@ qx.$$loader = {
   boot : "boot",
   closureParts : {},
   bootIsInline : false,
-  
+
   decodeUris : function(compressedUris)
   {
     var libs = qx.$$libraries;
@@ -44,12 +44,12 @@ qx.$$loader = {
       } else {
         euri = compressedUris[i];
       }
-      
+
       uris.push(euri);
     }
-    return uris;      
+    return uris;
   }
-};  
+};
 
 function loadScript(uri, callback) {
   var elem = document.createElement("script");
@@ -78,7 +78,7 @@ function loadScriptList(list, callback) {
     if (isWebkit) {
       // force asynchronous load
       // Safari fails with an "maximum recursion depth exceeded" error if it is
-      // called sync.      
+      // called sync.
       window.setTimeout(function() {
         loadScriptList(list, callback);
       }, 0);
@@ -106,7 +106,7 @@ qx.$$loader.importPackageData = function (dataMap) {
     var qxlocs = qx.$$locales;
     for (var lang in locMap){
       if (!qxlocs[lang]) qxlocs[lang] = locMap[lang];
-      else 
+      else
         for (var k in locMap[lang]) qxlocs[lang][k] = locMap[lang][k];
     }
   }
@@ -115,13 +115,13 @@ qx.$$loader.importPackageData = function (dataMap) {
     var qxtrans = qx.$$translations;
     for (var lang in trMap){
       if (!qxtrans[lang]) qxtrans[lang] = trMap[lang];
-      else 
+      else
         for (var k in trMap[lang]) qxtrans[lang][k] = trMap[lang][k];
     }
   }
 }
 
-qx.$$loader.signalStartup = function () 
+qx.$$loader.signalStartup = function ()
 {
   qx.$$loader.scriptLoaded = true;
   if (window.qx && qx.event && qx.event.handler && qx.event.handler.Application) qx.event.handler.Application.onScriptLoaded();

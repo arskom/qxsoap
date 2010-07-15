@@ -30,18 +30,18 @@ qx.Class.define("soap.demo.scr.basic.Simple", { extend : qx.core.Object
     ,properties : {
         widget : { check : "Object" }
     }
-    ,construct : function () {    	
+    ,construct : function () {
         this.base(arguments);
         var cnt = new qx.ui.container.Composite(new qx.ui.layout.HBox());
         this.setWidget(cnt);
-        
+
         var gbLogin = new qx.ui.groupbox.GroupBox("Demo");
         gbLogin.setLayout(new qx.ui.layout.Grid());
         cnt.add(gbLogin);
-        
+
         gbLogin.add(new qx.ui.basic.Label("Name:"), {column: 0, row: 0});
         gbLogin.add(new qx.ui.basic.Label("Times:"), {column: 0, row: 1});
-        
+
         var txtName = new qx.ui.form.TextField("Qooxdoo Skywalker");
         var txtTimes = new qx.ui.form.TextField("5");
         gbLogin.add(txtName, {column: 1, row: 0});
@@ -55,7 +55,7 @@ qx.Class.define("soap.demo.scr.basic.Simple", { extend : qx.core.Object
 
         btnSubmitName.addListener("execute", function(e) {
             var params = new soap.Parameters();
-    
+
             var self = this;
             self.SoapRunning = soap.demo.Application.cliSvc.callAsync( "name", params, function(r) {
                 self.SoapRunning = null;

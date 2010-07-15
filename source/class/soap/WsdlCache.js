@@ -85,7 +85,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             schema_node = types_node.childNodes[i];
             var schema_tns = schema_node.getAttribute("targetNamespace");
             var schema_key = schema_tns;
-            
+
             var schema = ctx.schema[schema_key];
             if (! schema) {
                 ctx.schema[schema_key] = new Object();
@@ -94,7 +94,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                 schema.element = new Object();
                 schema.complex = new Object();
             }
-    
+
             cn = schema_node.childNodes;
             for (j=0, k = cn.length; j<k; ++j) {
                 tn = cn[j].tagName;
@@ -174,7 +174,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
         ,__type_from_node: function(node) {
             var elt = new Object();
-            
+
             elt.type = node.getAttribute("type");
             elt.name = node.getAttribute("name");
             if (elt.type) {
@@ -309,7 +309,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
         ,get_class: function(object_namespace, object_name) {
             var ctx=this;
-            
+
             if (! object_name) {
                 throw new Error("object_name must be defined!");
             }
@@ -326,7 +326,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
             return clazz;
         }
-        
+
         ,get_object: function(object_namespace, object_name) {
             var clazz = this.get_class(object_namespace, object_name);
             var retval;

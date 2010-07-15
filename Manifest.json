@@ -4,7 +4,7 @@
 
     "summary" : "A Soap client library for qooxdoo",
     "description" : "A SOAP/WSDL 1.1 Compliant SOAP client library for qooxdoo",
-    
+
     "homepage" : "http://github.com/arskom/qxsoap",
 
     "license" : "BSD",
@@ -18,7 +18,7 @@
     "version" : "trunk",
     "qooxdoo-versions": ["1.1"]
   },
-  
+
   "provides" : {
     "namespace"   : "soap",
     "encoding"    : "utf-8",

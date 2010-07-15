@@ -41,7 +41,7 @@ qx.Class.define("soap.demo.Application", { extend : qx.application.Standalone
             this.self(arguments).cliSvc = new soap.Client("http://"+document.location.host+"/svc/");
 
             var ctx=this;
-            this.self(arguments).cliSvc.callAsync("name", new  soap.Parameters(), function(r) { 
+            this.self(arguments).cliSvc.callAsync("name", new  soap.Parameters(), function(r) {
 //                 alert(r);
             });
 

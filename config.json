@@ -42,7 +42,7 @@
     // project; make sure to adapt the path to the Manifest.json; if you are
     // using a contrib: library, it will be downloaded into the path specified
     // by the 'cache/downloads' config key
-    "libraries" : 
+    "libraries" :
     {
       "library" :
       [
@@ -57,13 +57,13 @@
     // To see a list of available jobs, invoke 'generate.py x'.
     "build-script" :
     {
-      "compile-options" : 
+      "compile-options" :
       {
         "code" :
         {
           "format" : false
         }
-      }      
+      }
     }
   }
   */

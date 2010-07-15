@@ -45,7 +45,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 soap.Client.setAttributeNS(doc, parent, "xsi:nil", _ns_xsi, 1);
             }
             else if (t == "string") {
-                parent.appendChild(doc.createTextNode(value)); 
+                parent.appendChild(doc.createTextNode(value));
             }
 
             else if (t == "number" || t == "boolean") {
@@ -165,7 +165,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             if (value == null || value + "" == "undefined") {
                 return this;
             }
-            
+
             this.__pl[name] = value;
             return this;
         }
