@@ -196,36 +196,40 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ,__get_simple_base : function(child) {
             var retval;
             var type_l = child.type.split(":")[1];
-            var simple_type = this.schema[child.ns].simple[type_l];
+            var simple_type_ns = this.schema[child.ns]
 
-            if (simple_type) {
-                while (simple_type.base != null) {
-                    var base_ns = this.schema[simple_type.base_ns]
+            if (simple_type_ns) {
+                var simple_type = simple_type_ns.simple[type_l];
+
+                if (simple_type) {
+                    while (simple_type.base != null) {
+                        var base_ns = this.schema[simple_type.base_ns]
+                        if (base_ns) {
+                            var base_l = simple_type.base.split(":")[1];
+                            simple_type = base_ns.simple[base_l];
+
+                            qx.core.Assert.assertNotUndefined(
+                                simple_type,
+                                "Simple Type " +
+                                "'{" + simple_type.base_ns + "}'" +
+                                " '" + simple_type.base + "' " +
+                                "does not exist");
+                        }
+                        else {
+                            base_ns = null;
+                            break;
+                        }
+                    }
+
                     if (base_ns) {
-                        var base_l = simple_type.base.split(":")[1];
-                        simple_type = base_ns.simple[base_l];
-
-                        qx.core.Assert.assertNotUndefined(
-                            simple_type,
-                            "Simple Type " +
-                            "'{" + simple_type.base_ns + "}'" +
-                            " '" + simple_type.base + "' " +
-                            "does not exist");
+                        retval = simple_type.type.split(":")[1];
                     }
                     else {
-                        base_ns = null;
-                        break;
+                        retval = simple_type.base.split(":")[1];
                     }
-                }
 
-                if (base_ns) {
-                    retval = simple_type.type.split(":")[1];
+                    retval = soap.Client.TYPE_MAP[retval];
                 }
-                else {
-                    retval = simple_type.base.split(":")[1];
-                }
-
-                retval = soap.Client.TYPE_MAP[retval];
             }
 
             return retval;
