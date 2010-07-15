@@ -243,6 +243,9 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                 throw new Error("object_name must be defined!");
             }
 
+            qx.log.Logger.debug("creating object: {" + object_namespace + "}"
+                                                            + object_name + "");
+
             var schema = ctx.schema[object_namespace];
             if (! schema) {
                 qx.log.Logger.debug("'" + object_namespace + "' not found!");
