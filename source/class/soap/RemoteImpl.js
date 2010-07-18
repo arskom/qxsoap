@@ -97,8 +97,6 @@ qx.Class.define("soap.RemoteImpl", { extend : qx.ui.table.model.Remote
             // issue soap call
             svc.callAsync(this.__data_method_name, args,
                 true, function(r) {
-                    r._start_row = first_row;
-
                     if (ctx.getMapper() != null) {
                         ctx.getMapper()(r);
                     }
