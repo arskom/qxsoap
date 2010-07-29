@@ -70,7 +70,21 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             var method = methods[method_name];
             for (j=0, k=cn[i].childNodes.length; j<k; ++j) {
                 var method_node = cn[i].childNodes[j];
-                tn = method_node.localName;
+
+                if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                    tn = method_node.baseName;
+                }
+                else {
+                    tn = method_node.localName;
+                }
+
+                method.input = new Object();
+                method.input.name = null;
+                method.input.message = null;
+
+                method.output = new Object();
+                method.output.name = null;
+                method.output.message = null;
 
                 if (tn == "input" || tn == "output") {
                     method[tn] = new Object();

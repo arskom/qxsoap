@@ -475,7 +475,14 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     for (i=0,l=node.childNodes.length; i<l; ++i) {
                         var val;
                         var n = node.childNodes[i];
-                        var nn = n.localName;
+                        var nn;
+
+                        if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                            nn = n.baseName;
+                        }
+                        else {
+                            nn = n.localName;
+                        }
 
                         is_null = n.getAttribute("xs:nil");
                         if (is_null == "1") {
