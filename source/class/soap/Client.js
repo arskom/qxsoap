@@ -78,13 +78,8 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             if (type_defn.length > 0) {
                 var tnode = node;
                 while (! retval) {
-                    if (tnode.getAttribute) {
-                        retval = tnode.getAttribute("xmlns:" + type_defn[0]);
-                        tnode = tnode.parentNode;
-                    }
-                    else {
-                        break;
-                    }
+                    retval = tnode.getAttribute("xmlns:" + type_defn[0]);
+                    tnode = tnode.parentNode;
                 }
             }
 
