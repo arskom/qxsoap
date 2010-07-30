@@ -197,7 +197,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             }
 
             /* this block completes callback and errback assignments:
-             * if the last argument is a function, is the callback.
+             * if the last argument is a function, it is the callback.
              * if the last two arguments are functions, the last one is the
              * errback and the one before that is the callback.
              */
