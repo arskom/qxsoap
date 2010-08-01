@@ -47,7 +47,8 @@ from soaplib.serializers.primitive import DateTime
 from soaplib.serializers.primitive import Integer
 from soaplib.serializers.primitive import String
 from soaplib.service import rpc
-from soaplib.wsgi_soap import SimpleWSGIApp
+from soaplib.wsgi import Application
+from soaplib.service import DefinitionBase
 
 import logging
 logger = logging.getLogger('soaplib')
@@ -221,7 +222,7 @@ class NestedObject(ClassSerializer):
 # Hello World example from http://trac.optio.webfactional.com/wiki/HelloWorld
 #
 
-class HelloWorldService(SimpleWSGIApp):
+class HelloWorldService(DefinitionBase):
     maxIntegerSize=5000 # adjust to your taste
 
     @rpc(String,Integer,_returns=Array(String))
@@ -278,8 +279,8 @@ class HelloWorldService(SimpleWSGIApp):
         return retval
 
 if __name__=='__main__':
-    l=[ ('/svc/', HelloWorldService()),
-        ('/svc.wsdl', HelloWorldService()) ]
+    l=[ ('/svc/', Application(HelloWorldService)),
+        ('/svc.wsdl', Application(HelloWorldService)) ]
 
     print 'cwd is %s' % os.getcwd()
     if os.getcwd() != sys.path[0]:
