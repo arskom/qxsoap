@@ -50,8 +50,8 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             ,"long": "Integer"
             ,"integer": "Integer"
 
-            ,"double": "Double"
-            ,"float": "Float"
+            ,"double": "Number"
+            ,"float": "Number"
 
             ,"datetime": "Date"
             ,"string" : "String"
