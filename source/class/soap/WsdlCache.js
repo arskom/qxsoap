@@ -313,6 +313,10 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
                         var prop_def = {"check": prop_type, init: null,
                                                                  nullable: true}
+
+                        qx.log.Logger.debug(object_name + "." + prop_name 
+                                                 + " is a '" + prop_type + "'");
+
                         props[prop_name] = prop_def;
                     }
                 }
