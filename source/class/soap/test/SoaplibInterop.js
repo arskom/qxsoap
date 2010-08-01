@@ -33,19 +33,67 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
     }
 
     ,members : {
-        c : null
+         c : null
 
-        ,test_echo_string : function() {
+        // helper functions
+
+        ,__test_echo_primitive: function(service_name, val) {
             var ctx = this;
-            var text = "punk";
-            ctx.c.easy("echo_string"
-                ,text
+            
+            ctx.c.easy(service_name
+                ,val
                 ,function(r) {
                     ctx.resume(function() {
-                        ctx.assertEquals(r, text);
+                        ctx.assertEquals(r, val);
                     });
                 });
             ctx.wait();
+        }
+
+        // primitive tests
+
+        ,test_echo_string : function() {
+            var val = "punk";
+            var service_name = "echo_string";
+
+            this.__test_echo_primitive(service_name, val);
+        }
+
+        ,test_echo_integer : function() {
+            var val = 10;
+            var service_name = "echo_integer";
+
+            this.__test_echo_primitive(service_name, val);
+        }
+
+        ,test_echo_float : function() {
+            var val = 10.1;
+            var service_name = "echo_float";
+
+            this.__test_echo_primitive(service_name, val);
+        }
+
+        ,test_echo_double : function() {
+            var val = 123132123.123981;
+            var service_name = "echo_double";
+
+            this.__test_echo_primitive(service_name, val);
+        }
+
+        ,test_echo_boolean : function() {
+            var val = true;
+            var service_name = "echo_boolean";
+
+            this.__test_echo_primitive(service_name, val);
+        }
+
+        // array tests
+
+        ,test_echo_integer_array : function() {
+            var val = [1,3,5,7,11];
+            var service_name = "echo_integer_array";
+
+            this.__test_echo_primitive(service_name, val);
         }
     }
 });
