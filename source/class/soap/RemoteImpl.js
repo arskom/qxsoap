@@ -57,10 +57,18 @@ qx.Class.define("soap.RemoteImpl", { extend : qx.ui.table.model.Remote
         ,__row_data_method_name: null
         ,__count_request_sent: false
         ,__args: null
+
         ,_loadRowCount : function() {
             var ctx = this;
             var svc = ctx.__soap_client;
             var args = ctx.__args;
+
+            if (ctx.__count_request_sent) {
+                return;
+            }
+            else {
+                ctx.__count_request_sent = true;
+            }
 
             svc.callAsync(this.__count_method_name, args,
                 true, function(r) {
@@ -81,13 +89,6 @@ qx.Class.define("soap.RemoteImpl", { extend : qx.ui.table.model.Remote
                                                  this.getSortColumnIndex() : 0);
 
             var sort_order = this.isSortAscending() ? "d" : "a";
-
-            if (ctx.__count_request_sent) {
-                return;
-            }
-            else {
-                ctx.__count_request_sent = true;
-            }
 
             req.set_sort_by(sort_column_index);
             req.set_sort_ord(sort_order);
