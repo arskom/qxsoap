@@ -7,4 +7,4 @@ nbproject
 *.pyo
 
 # qooxdoo output
-test
+/test
