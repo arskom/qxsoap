@@ -6,3 +6,5 @@ nbproject
 *.pyc
 *.pyo
 
+# qooxdoo output
+test
