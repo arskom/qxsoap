@@ -53,7 +53,7 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
         // primitive tests
 
         ,test_echo_string : function() {
-            var val = "punk";
+            var val = "punk üğışçöÜĞİŞÇÖ";
             var service_name = "echo_string";
 
             this.__test_echo_primitive(service_name, val);
