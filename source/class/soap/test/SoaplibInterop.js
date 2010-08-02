@@ -87,6 +87,13 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
             this.__test_echo_primitive(service_name, val);
         }
 
+        ,test_echo_datetime : function() {
+            var val = new Date();
+            var service_name = "echo_datetime";
+
+            this.__test_echo_primitive(service_name, val);
+        }
+
         // array tests
 
         ,test_echo_integer_array : function() {
