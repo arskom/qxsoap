@@ -110,5 +110,12 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
             this.__test_echo_primitive(service_name, val);
         }
 
+        ,test_echo_float_array : function() {
+            var val = [1.1, 3.3, 5.5, 7.7, 11.11];
+            var service_name = "echo_float_array";
+
+            this.__test_echo_primitive(service_name, val);
+        }
+
     }
 });
