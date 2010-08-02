@@ -39,7 +39,7 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
 
         ,__test_echo_primitive: function(service_name, val) {
             var ctx = this;
-            
+
             ctx.c.easy(service_name
                 ,val
                 ,function(r) {
