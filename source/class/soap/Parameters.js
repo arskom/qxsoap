@@ -127,14 +127,14 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
                                 child = soap.Client.createSubElementNS(
                                            doc,parent,type,parent.namespaceURI);
-                                this.__serialize(doc, child, value[i]);
+                                this.__serialize(doc, child, value[i], cache);
                             }
                             break;
                         }
                         else { // associative array
                             child = soap.Client.createSubElementNS(doc,
                                              parent, name, parent.namespaceURI);
-                            this.__serialize(doc, child, value[name]);
+                            this.__serialize(doc, child, value[name], cache);
                         }
                     }
                 }
@@ -154,7 +154,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                             var key = k.slice(1);
                             child = soap.Client.createSubElementNS(doc,
                                                                parent, key, ns);
-                            this.__serialize(doc, child, data);
+                            this.__serialize(doc, child, data, cache);
                         }
                     }
                 }
