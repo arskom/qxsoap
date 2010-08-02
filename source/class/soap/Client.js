@@ -140,6 +140,19 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
             return retval;
         }
+
+        ,get_type_name_from_node : function(node) {
+            var retval = node.getAttribute("type");
+
+            if (retval == null) {
+                retval = node.getAttribute("xsi:type");
+            }
+            if (retval == null) {
+                retval = node.nodeName;
+            }
+
+            return retval;
+        }
     }
 
     ,members : {
@@ -334,7 +347,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
         ,__get_ns_from_node : function(node) {
             var retval;
-            var type_qname = this.__get_type_name_from_node(node)
+            var type_qname = soap.Client.get_type_name_from_node(node)
             retval = soap.Client.type_qname_to_ns(node, type_qname);
 
             if (retval == null) {
@@ -343,19 +356,6 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
             if (retval == null) {
                 retval = this.cache.get_target_namespace();
-            }
-
-            return retval;
-        }
-
-        ,__get_type_name_from_node : function(node) {
-            var retval = node.getAttribute("type");
-
-            if (retval == null) {
-                retval = node.getAttribute("xsi:type");
-            }
-            if (retval == null) {
-                retval = node.nodeName;
             }
 
             return retval;
@@ -370,7 +370,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 return null;
             }
 
-            var type_name = this.__get_type_name_from_node(node);
+            var type_name = soap.Client.get_type_name_from_node(node);
             var type_ns = this.__get_ns_from_node(node);
 
             var type_local = type_name.split(":")[1];
@@ -440,7 +440,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 // the children list in the parent's wsdl declaration.
                 if (! defn) {
                     if (! parent_defn) {
-                        var parent_type_name = this.__get_type_name_from_node(
+                        var parent_type_name = soap.Client.get_type_name_from_node(
                                                                node.parentNode);
                         var parent_ns = this.__get_ns_from_node(node.parentNode);
                         var parent_local = parent_type_name.split(":")[1];
