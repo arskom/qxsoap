@@ -38,7 +38,14 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
         ,__decode_array : function(doc, parent, value, cache) {
             for (var i=0, l=value.length; i<l; ++i) {
                 var p_ns = parent.parentNode.namespaceURI;
-                var p_ln = parent.parentNode.localName;
+                var p_ln;
+                
+                if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                    p_ln = parent.parentNode.baseName;
+                }
+                else {
+                    p_ln = parent.parentNode.localName;
+                }
 
                 var type_name = cache.schema[p_ns].complex[p_ln].children[0].type
                 var type_ns = cache.type_qname_to_ns(parent, type_name);
