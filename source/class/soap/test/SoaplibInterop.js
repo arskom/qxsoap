@@ -29,6 +29,12 @@
 qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
     construct : function() {
         this.c = new soap.Client('http://'+document.location.host+'/app/');
+        try {
+            this.c.easy("!_name_!");
+        }
+        catch(e) {
+
+        }
         qx.log.Logger.debug("hey.");
     }
 
