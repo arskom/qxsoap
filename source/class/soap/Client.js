@@ -399,7 +399,8 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                             if (ms_end_ind == -1) {
                                 ms_end_ind = value.length
                             }
-                            var ms_string = value.substring(ms_start_ind, ms_end_ind);
+                            var ms_string = value.substring(ms_start_ind,
+                                                                    ms_end_ind);
                             ms = parseInt(ms_string.substring(0,3));
                         }
 
