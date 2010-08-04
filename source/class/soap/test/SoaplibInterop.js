@@ -175,6 +175,126 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
 
         // complex object tests
 
+        ,__test_simple_class : function(r,v) {
+            this.assertEquals(r.get_i(), v.get_i());
+            this.assertEquals(r.get_s(), v.get_s());
+        }
+
+        ,__test_nested_class : function(r,v) {
+            this.assertEquals(r.get_i(), v.get_i());
+            this.assertEquals(r.get_s(), v.get_s());
+            this.assertEquals(r.get_f(), v.get_f());
+
+            for (var i=0; i<r.get_simple().length; ++i) {
+                this.__test_simple_class(r.get_simple()[i], v.get_simple()[i]);
+            }
+
+            this.__test_other_class(r.get_other(), v.get_other());
+        }
+
+        ,__test_other_class : function(r,v) {
+            this.assertEquals(r.get_dt().getTime(), v.get_dt().getTime());
+            this.assertEquals(r.get_d(), v.get_d());
+            this.assertEquals(r.get_b(), v.get_b());
+        }
+
+        ,test_echo_simple_class : function() {
+            var service_name = "echo_simple_class";
+            var ctx = this;
+
+            var val = this.c.get_object(ctx.ns,"SimpleClass");
+            val.set_i(45);
+            val.set_s("asd");
+
+            this.__test_echo(service_name, val, function(r,v) {
+                ctx.__test_simple_class(r,v);
+            });
+        }
+
+        ,test_echo_simple_class_array : function() {
+            var service_name = "echo_simple_class_array";
+            var ctx = this;
+            var val = []
+
+            val.push(this.c.get_object(ctx.ns,"SimpleClass"));
+            val.push(this.c.get_object(ctx.ns,"SimpleClass"));
+
+            val[0].set_i(45);
+            val[0].set_s("asd");
+
+            val[1].set_i(12);
+            val[1].set_s("qwe");
+
+            this.__test_echo_array(service_name, val, function(r,v,i) {
+                ctx.__test_simple_class(r[i],v[i]);
+            });
+        }
+
+        ,test_echo_nested_class : function() {
+            var service_name = "echo_nested_class";
+            var ctx = this;
+            var val = this.c.get_object(ctx.ns,"NestedClass");
+
+            val.set_i(45);
+            val.set_s("asd");
+            val.set_f(12.34);
+
+            val.set_simple([]);
+            val.get_simple().push(this.c.get_object(ctx.ns,"SimpleClass"));
+            val.get_simple().push(this.c.get_object(ctx.ns,"SimpleClass"));
+
+            val.get_simple()[0].set_i(45);
+            val.get_simple()[0].set_s("asd");
+            val.get_simple()[1].set_i(12);
+            val.get_simple()[1].set_s("qwe");
+
+            val.set_other(this.c.get_object(ctx.ns,"OtherClass"));
+            val.get_other().set_dt(new Date(2010,05,02));
+            val.get_other().set_d(123.456);
+            val.get_other().set_b(true);
+
+            this.__test_echo(service_name, val, function(r,v) {
+                ctx.__test_nested_class(r,v);
+            });
+        }
+
+        ,test_echo_nested_class_array : function() {
+            var service_name = "echo_nested_class_array";
+            var ctx = this;
+            var val = []
+
+            val.push(this.c.get_object(ctx.ns,"NestedClass"));
+            val.push(this.c.get_object(ctx.ns,"NestedClass"));
+
+            for (var i=0; i< val.length; ++i) {
+                val[i].set_i(45 + i);
+                val[i].set_s("asd" + i);
+                val[i].set_f(12.34 + i);
+
+                val[i].set_simple([]);
+                val[i].get_simple().push(this.c.get_object(ctx.ns,"SimpleClass"));
+                val[i].get_simple().push(this.c.get_object(ctx.ns,"SimpleClass"));
+
+                val[i].get_simple()[0].set_i(45 + i);
+                val[i].get_simple()[0].set_s("asd"  + i);
+                val[i].get_simple()[1].set_i(12 + i);
+                val[i].get_simple()[1].set_s("qwe" + i);
+
+                val[i].set_other(this.c.get_object(ctx.ns,"OtherClass"));
+                val[i].get_other().set_dt(new Date(new Date().getTime() + i));
+                val[i].get_other().set_d(123.456 + i);
+                val[i].get_other().set_b(true);
+            }
+
+            this.__test_echo_array(service_name, val, function(r,v,i) {
+                ctx.__test_nested_class(r[i],v[i]);
+            });
+        }
+
+        ,test_echo_extension_class : function() {
+
+        }
+
         // misc tests
         ,test_empty: function() {
             var ctx=this;
