@@ -39,7 +39,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             for (var i=0, l=value.length; i<l; ++i) {
                 var p_ns = parent.parentNode.namespaceURI;
                 var p_ln;
-                
+
                 if (qx.core.Variant.isSet("qx.client", "mshtml")) {
                     p_ln = parent.parentNode.baseName;
                 }
