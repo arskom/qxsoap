@@ -35,7 +35,9 @@ qx.Class.define("soap.Call", {extend: qx.core.Object
     }
 
     ,construct: function(client, name, params) {
-
+        this.set_client(client);
+        this.set_name(name);
+        this.set_params(params);
     }
 
     ,members: {
