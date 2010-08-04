@@ -34,12 +34,6 @@ qx.Class.define("soap.Call", {extend: qx.core.Object
         ,_simple : { check: "Boolean", init:false}
     }
 
-    ,construct: function(client, name, params) {
-        this.set_client(client);
-        this.set_name(name);
-        this.set_params(params);
-    }
-
     ,members: {
         easy: function() {
             var args = arguments;
