@@ -50,6 +50,22 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
             ctx.wait();
         }
 
+        ,__test_echo_array: function(service_name, val) {
+            var ctx = this;
+
+            ctx.c.easy(service_name
+                ,val
+                ,function(r) {
+                    ctx.resume(function() {
+                        ctx.assertEquals(r.length, val.length);
+                        for (var i=0,l=r.length; i<l; ++i) {
+                            ctx.assertEquals(r[i], val[i]);
+                        }
+                    });
+                });
+            ctx.wait();
+        }
+
         // primitive tests
 
         ,test_echo_string : function() {
@@ -100,35 +116,35 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
             var val = [1,3,5,7,11];
             var service_name = "echo_integer_array";
 
-            this.__test_echo_primitive(service_name, val);
+            this.__test_echo_array(service_name, val);
         }
 
         ,test_echo_string_array : function() {
             var val = ["hobaaa", "bir", "punk", "üğışçöÜĞİŞÇÖ"];
             var service_name = "echo_string_array";
 
-            this.__test_echo_primitive(service_name, val);
+            this.__test_echo_array(service_name, val);
         }
 
         ,test_echo_float_array : function() {
             var val = [1.1, 3.3, 5.5, 7.7, 11.11];
             var service_name = "echo_float_array";
 
-            this.__test_echo_primitive(service_name, val);
+            this.__test_echo_array(service_name, val);
         }
 
         ,test_echo_double_array : function() {
             var val = [1123123123.12313123, 99999999.9999999];
             var service_name = "echo_double_array";
 
-            this.__test_echo_primitive(service_name, val);
+            this.__test_echo_array(service_name, val);
         }
 
         ,test_echo_boolean_array : function() {
             var val = [true,false,true];
             var service_name = "echo_boolean_array";
 
-            this.__test_echo_primitive(service_name, val);
+            this.__test_echo_array(service_name, val);
         }
     }
 });

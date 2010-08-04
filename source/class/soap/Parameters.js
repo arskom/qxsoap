@@ -35,6 +35,24 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
     ,members : {
         __pl : null
 
+        ,__decode_array : function(doc, parent, value, cache) {
+            for (var i=0, l=value.length; i<l; ++i) {
+                var p_ns = parent.parentNode.namespaceURI;
+                var p_ln = parent.parentNode.localName;
+
+                var type_name = cache.schema[p_ns].complex[p_ln].children[0].type
+                var type_ns = cache.type_qname_to_ns(parent, type_name);
+                var type_local = type_name.split(":")[1];
+                var type_defn = cache.schema[type_ns].complex[type_local];
+                var child_name = type_defn.children[0].name;
+
+                var child = soap.Client.createSubElementNS(
+                          doc,parent,child_name,parent.namespaceURI);
+
+                this.__serialize(doc, child, value[i], cache);
+            }
+        }
+
         ,__serialize : function(doc, parent, value, cache) {
             var t = typeof(value);
             var child;
@@ -47,17 +65,14 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             else if (t == "string") {
                 parent.appendChild(doc.createTextNode(value));
             }
-
             else if (t == "number" || t == "boolean") {
                 parent.appendChild(doc.createTextNode(value.toString()));
             }
-
             else if (t == "object") {
                 if (value instanceof qx.locale.LocalizedString) {
                     parent.appendChild(doc.createTextNode(value.toString()));
                 }
-
-                else if(value instanceof Date) {
+                else if (value instanceof Date) {
                     var year = value.getFullYear().toString();
                     var month = (value.getMonth() + 1).toString();
 
@@ -102,39 +117,16 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 // Array
                 else if(value instanceof Array) {
                     for(var name in value) {
-                        if(!isNaN(name)) { // contiguous array
-                            for (var i = 0; i<value.length; ++i) {
-                                var type=null;
-
-                                if (value[i].basename) {
-                                    type = value[i].basename;
-                                }
-                                else {
-                                    type = Object.prototype.toString.call(
-                                                         value[i]).slice(8, -1);
-                                }
-
-                                var type_map = {
-                                    "String": "string",
-                                    "Number": "double", // FIXME: bunun inti var float'i var ohoo
-                                    "Boolean": "bool",
-                                    "Date": "DateTime"
-                                }
-
-                                if (type_map[type]) {
-                                    type = type_map[type];
-                                }
-
-                                child = soap.Client.createSubElementNS(
-                                           doc,parent,type,parent.namespaceURI);
-                                this.__serialize(doc, child, value[i], cache);
+                        if (value.hasOwnProperty(name)) {
+                            if(!isNaN(name)) { // contiguous array
+                                this.__decode_array(doc, parent, value, cache);
+                                break;
                             }
-                            break;
-                        }
-                        else { // associative array
-                            child = soap.Client.createSubElementNS(doc,
+                            else { // associative array
+                                child = soap.Client.createSubElementNS(doc,
                                              parent, name, parent.namespaceURI);
-                            this.__serialize(doc, child, value[name], cache);
+                                this.__serialize(doc, child, value[name], cache);
+                            }
                         }
                     }
                 }

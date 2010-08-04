@@ -28,9 +28,9 @@
 
 qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
     ,properties: {
-         _client : {check: "soap.Client"}
+         _name   : {check: "String"}
+        ,_client : {check: "soap.Client"}
         ,_params : {check: "soap.Parameters"}
-        ,_name : {check: "String"}
         ,_simple : {check: "Boolean", init:false}
     }
 
@@ -44,6 +44,8 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ctx.schema = new Object();
         ctx.__target_namespace = node.documentElement.getAttribute(
                                                              "targetNamespace");
+        ctx.__prefix_map = new Object();
+
         qx.log.Logger.debug("New service: " + ctx.__target_namespace);
 
         if (qx.core.Variant.isSet("qx.client", "mshtml")) {
@@ -56,14 +58,13 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         var cn = this.definitions.childNodes;
 
         var i,l,j,k,tn;
-
         var port_type_node = get_elts(node, _ns_wsdl, 'portType')[0];
         var types_node = get_elts(node, _ns_wsdl, 'types')[0];
 
         // fill methods
         var methods = ctx.methods;
         cn = port_type_node.childNodes;
-        for (i=0, l = cn.length; i<l; ++i) {
+        for (i=0, l=cn.length; i<l; ++i) {
             var method_name = cn[i].getAttribute("name");
             methods[method_name] = new Object();
 
@@ -127,7 +128,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     for (var n = cn[j].firstChild; n != null; n=n.nextSibling) {
                         if (n.nodeName == 'xs:restriction') {
                             elt.base = n.getAttribute("base");
-                            elt.base_ns = soap.Client.type_qname_to_ns(n,elt.base);
+                            elt.base_ns = this.type_qname_to_ns(n,elt.base);
                             elt.restrictions = new Object();
                             for (var r = n.firstChild; r != null; r=r.nextSibling) {
                                 // TODO: fill restrictions
@@ -154,6 +155,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                             child = this.__type_from_node(first_node);
 
                             elt.children[child.name] = child;
+                            elt.children[0] = child;
                         }
                         else {
                             var order=0;
@@ -192,7 +194,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             elt.type = node.getAttribute("type");
             elt.name = node.getAttribute("name");
             if (elt.type) {
-                elt.ns = soap.Client.type_qname_to_ns(node, elt.type);
+                elt.ns = this.type_qname_to_ns(node, elt.type);
             }
             else {
                 elt.ns = node.parentNode.getAttribute("targetNamespace")
@@ -201,6 +203,29 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             elt.base = null;
 
             return elt;
+        }
+
+        ,type_qname_to_ns: function(node, type_qname) {
+            var type_defn = type_qname.split(":");
+            var retval;
+
+            if (type_defn.length > 0) {
+                retval = this.__prefix_map[type_defn[0]];
+
+                if (! retval) {
+                    var tnode = node;
+                    while (! retval) {
+                        retval = tnode.getAttribute("xmlns:" + type_defn[0]);
+                        tnode = tnode.parentNode;
+                    }
+
+                    if (retval) {
+                        this.__prefix_map[type_defn[0]] = retval;
+                    }
+                }
+            }
+
+            return retval;
         }
 
         ,get_target_namespace: function() {

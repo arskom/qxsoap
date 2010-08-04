@@ -70,26 +70,6 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             }
         }
 
-        ,type_qname_to_ns: function(node, type_qname) {
-            var retval;
-
-            var type_defn = type_qname.split(":");
-
-            if (type_defn.length > 0) {
-                var tnode = node;
-                while (! retval) {
-                    retval = tnode.getAttribute("xmlns:" + type_defn[0]);
-                    tnode = tnode.parentNode;
-                }
-            }
-
-            qx.core.Assert.assertNotEquals(retval, null,
-                        "Unable to deduce namespace of '" + type_qname +
-                                                            "' from xml file!");
-
-            return retval;
-        }
-
         ,createSubElementNS: function(doc, parent, name, ns) {
             var retval;
 
@@ -348,7 +328,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
         ,__get_ns_from_node : function(node) {
             var retval;
             var type_qname = soap.Client.get_type_name_from_node(node)
-            retval = soap.Client.type_qname_to_ns(node, type_qname);
+            retval = this.cache.type_qname_to_ns(node, type_qname);
 
             if (retval == null) {
                 retval = node.namespaceURI;
@@ -450,7 +430,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     }
 
                     type_name = parent_defn.children[type_local].type;
-                    type_ns = soap.Client.type_qname_to_ns(node, type_name)
+                    type_ns = this.cache.type_qname_to_ns(node, type_name)
                     type_local = type_name.split(":")[1];
 
                     defn = this.cache.schema[type_ns].complex[type_local];
