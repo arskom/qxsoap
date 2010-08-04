@@ -388,18 +388,36 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 else if (type_local_l == "datetime") {
                     if (value != null) {
                         value = value + "";
+
+                        var ind_dot = value.lastIndexOf(".");
+                        var ind_plus = value.lastIndexOf("+");
+
+                        var ms = 0;
+                        if (ind_dot != -1) {
+                            var ms_start_ind = ind_dot + 1;
+                            var ms_end_ind = ind_plus;
+                            if (ms_end_ind == -1) {
+                                ms_end_ind = value.length
+                            }
+                            var ms_string = value.substring(ms_start_ind, ms_end_ind);
+                            ms = parseInt(ms_string.substring(0,3));
+                        }
+
                         value = value.substring(0, (
-                            value.lastIndexOf(".") == -1 ? (
-                                value.lastIndexOf("+") == -1 ?
+                            ind_dot == -1 ? (
+                                ind_plus  == -1 ?
                                 value.length :
-                                value.lastIndexOf("+")
+                                ind_plus
                             ) :
-                            value.lastIndexOf(".")));
+                            ind_dot));
 
                         value = value.replace(/T/gi," ");
                         value = value.replace(/-/gi,"/");
+                        var time_ms = Date.parse(value);
+                        time_ms += ms;
+
                         retval = new Date();
-                        retval.setTime(Date.parse(value));
+                        retval.setTime(time_ms);
                     }
                 }
                 else if (type_local_l == "string") {
@@ -507,7 +525,6 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             return retval;
         }
 
-        // private: invoke async
         ,__load_wsdl : function(method_, parameters, async, simple, callback,
                                                                       errback) {
             var retval;

@@ -175,19 +175,10 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
         ,to_xml : function(doc, parent, cache) {
             for(var name in this.__pl) {
-                switch(typeof(this.__pl[name])) {
-                case "string":
-                case "number":
-                case "object":
-                case "boolean":
+                if (this.__pl.hasOwnProperty(name)) {
                     var child = soap.Client.createSubElementNS(doc, parent,
                                             name, cache.get_target_namespace());
                     this.__serialize(doc, child, this.__pl[name], cache);
-                    break;
-
-                default:
-                    this.warn("variable '" + name + "' with type '" +
-                                           typeof(this.__pl[name])+"' ignored");
                 }
             }
         }
