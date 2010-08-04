@@ -47,7 +47,14 @@ qx.Class.define("soap.ClientCollection", { extend: qx.core.Object
                     var curl = this.get_url() + "/" + caddr + "/";
                     var client = new soap.Client(curl);
                     if (callback) {
-                        client.easy("name", callback);
+                        try {
+                            // this is to have the wsdl requested, so the method
+                            // name does not matter.
+                            client.easy("!_name_!", callback);
+                        }
+                        catch(e) {
+                            
+                        }
                     }
                     obj[parts[i]] = client;
                 }
