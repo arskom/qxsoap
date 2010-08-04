@@ -198,6 +198,27 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
             this.assertEquals(r.get_b(), v.get_b());
         }
 
+        ,__test_non_nillable_class : function(r,v) {
+            this.assertEquals(r.get_dt().getTime(), v.get_dt().getTime());
+            this.assertEquals(r.get_i(), v.get_i());
+            this.assertEquals(r.get_s(), v.get_s());
+        }
+
+        ,__test_extended_class : function(r,v) {
+            this.assertEquals(r.get_i(), v.get_i());
+            this.assertEquals(r.get_s(), v.get_s());
+            this.assertEquals(r.get_f(), v.get_f());
+
+            for (var i=0; i<r.get_simple().length; ++i) {
+                this.__test_simple_class(r.get_simple()[i], v.get_simple()[i]);
+            }
+
+            this.__test_other_class(r.get_other(), v.get_other());
+            this.__test_non_nillable_class(r.get_p(), v.get_p());
+            this.assertEquals(r.get_l(), v.get_l());
+            this.assertEquals(r.get_q(), v.get_q());
+        }
+
         ,test_echo_simple_class : function() {
             var service_name = "echo_simple_class";
             var ctx = this;
@@ -292,7 +313,39 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
         }
 
         ,test_echo_extension_class : function() {
+            var service_name = "echo_extension_class";
+            var ctx = this;
+            var val = this.c.get_object(ctx.ns,"ExtensionClass");
 
+            val.set_i(45);
+            val.set_s("asd");
+            val.set_f(12.34);
+
+            val.set_simple([]);
+            val.get_simple().push(this.c.get_object(ctx.ns,"SimpleClass"));
+            val.get_simple().push(this.c.get_object(ctx.ns,"SimpleClass"));
+
+            val.get_simple()[0].set_i(45);
+            val.get_simple()[0].set_s("asd");
+            val.get_simple()[1].set_i(12);
+            val.get_simple()[1].set_s("qwe");
+
+            val.set_other(this.c.get_object(ctx.ns,"OtherClass"));
+            val.get_other().set_dt(new Date(2010,05,02));
+            val.get_other().set_d(123.456);
+            val.get_other().set_b(true);
+
+            val.set_p(this.c.get_object(ctx.ns,"NonNillableClass"));
+            val.get_p().set_dt(new Date(2010,06,02));
+            val.get_p().set_i(123);
+            val.get_p().set_s("punk");
+
+            val.set_l(new Date(2010,07,02));
+            val.set_q(5);
+
+            this.__test_echo(service_name, val, function(r,v) {
+                ctx.__test_extended_class(r,v);
+            });
         }
 
         // misc tests
