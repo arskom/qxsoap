@@ -37,33 +37,37 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
 
         // helper functions
 
-        ,__test_echo_primitive: function(service_name, val) {
+        ,__test_echo_primitive: function(service_name, val, cb) {
             var ctx = this;
 
             ctx.c.easy(service_name
                 ,val
                 ,function(r) {
                     ctx.resume(function() {
-                        ctx.assertEquals(r, val);
+                        if (cb) {
+                            cb(r,val)
+                        }
+                        else {
+                            ctx.assertEquals(r, val);
+                        }
                     });
                 });
             ctx.wait();
         }
 
-        ,__test_echo_array: function(service_name, val) {
+        ,__test_echo_array: function(service_name, val, cb) {
             var ctx = this;
 
-            ctx.c.easy(service_name
-                ,val
-                ,function(r) {
-                    ctx.resume(function() {
-                        ctx.assertEquals(r.length, val.length);
-                        for (var i=0,l=r.length; i<l; ++i) {
-                            ctx.assertEquals(r[i], val[i]);
-                        }
-                    });
-                });
-            ctx.wait();
+            ctx.__test_echo_primitive(service_name, val, function(r,v) {
+                for (var i=0,l=r.length; i<l; ++i) {
+                    if (cb) {
+                        cb(r,v,i);
+                    }
+                    else {
+                        ctx.assertEquals(r[i], val[i]);
+                    }
+                }
+            });
         }
 
         // primitive tests
@@ -104,10 +108,13 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
         }
 
         ,test_echo_datetime : function() {
+            var ctx = this;
             var val = new Date();
             var service_name = "echo_datetime";
 
-            this.__test_echo_primitive(service_name, val);
+            this.__test_echo_primitive(service_name, val, function(r,v) {
+                ctx.assertEquals(r.getTime(), v.getTime());
+            });
         }
 
         // array tests
