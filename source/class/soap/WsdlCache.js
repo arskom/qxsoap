@@ -96,6 +96,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         }
 
         var schema_node = null;
+        var n;
         for (i=0, l=types_node.childNodes.length; i<l; ++i) {
             schema_node = types_node.childNodes[i];
             var schema_tns = schema_node.getAttribute("targetNamespace");
@@ -125,7 +126,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                 else if (tn == "xs:simpleType") {
                     schema.simple[elt.name] = elt
 
-                    for (var n = cn[j].firstChild; n != null; n=n.nextSibling) {
+                    for (n = cn[j].firstChild; n != null; n=n.nextSibling) {
                         if (n.nodeName == 'xs:restriction') {
                             elt.base = n.getAttribute("base");
                             elt.base_ns = this.type_qname_to_ns(n,elt.base);
@@ -159,7 +160,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                         }
                         else {
                             var order=0;
-                            for (var n=first_node; n!=null; n=n.nextSibling) {
+                            for (n=first_node; n!=null; n=n.nextSibling) {
                                 child = this.__type_from_node(n);
 
                                 elt.children[child.name] = child;
