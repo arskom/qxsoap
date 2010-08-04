@@ -97,7 +97,11 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                     var seconds = value.getSeconds().toString();
                     seconds = (seconds.length == 1) ? "0" + seconds : seconds;
 
-                    var milliseconds = value.getMilliseconds().toString();
+                    var miliseconds = value.getMilliseconds().toString();
+                    while (miliseconds.length < 3) {
+                        miliseconds = "0" + miliseconds;
+                    }
+                    
                     var tzminutes = Math.abs(value.getTimezoneOffset());
                     var tzhours = 0;
 
@@ -114,7 +118,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
                     value = year + "-" + month + "-" + date + "T"
                             + hours + ":" + minutes + ":" + seconds + "."
-                            + milliseconds + timezone;
+                            + miliseconds + timezone;
 
                     parent.appendChild(doc.createTextNode(value));
                 }
