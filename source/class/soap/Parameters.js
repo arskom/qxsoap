@@ -46,6 +46,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 this.__serialize(doc, child, value[i], cache, child_defn);
             }
         }
+        
         ,__get_child_defn: function(parent_defn, cache, child_name) {
             var type_name = parent_defn.children[child_name].type
             var type_ns = parent_defn.children[child_name].ns
@@ -58,13 +59,77 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             return retval;
         }
 
+        ,__decode_object: function(doc, parent, value, cache, parent_defn) {
+            if (value instanceof qx.locale.LocalizedString) {
+                parent.appendChild(doc.createTextNode(value.toString()));
+            }
+            else if (value instanceof Date) {
+                var year = value.getFullYear().toString();
+                var month = (value.getMonth() + 1).toString();
+
+                month = (month.length == 1) ? "0" + month : month;
+
+                var date = value.getDate().toString();
+                date = (date.length == 1) ? "0" + date : date;
+
+                var hours = value.getHours().toString();
+                hours = (hours.length == 1) ? "0" + hours : hours;
+
+                var minutes = value.getMinutes().toString();
+                minutes = (minutes.length == 1) ? "0" + minutes : minutes;
+
+                var seconds = value.getSeconds().toString();
+                seconds = (seconds.length == 1) ? "0" + seconds : seconds;
+
+                var miliseconds = value.getMilliseconds().toString();
+                while (miliseconds.length < 3) {
+                    miliseconds = "0" + miliseconds;
+                }
+
+                var tzminutes = Math.abs(value.getTimezoneOffset());
+                var tzhours = 0;
+
+                while(tzminutes >= 60) {
+                    tzhours++;
+                    tzminutes -= 60;
+                }
+                tzminutes = (tzminutes.toString().length == 1) ?
+                              "0" + tzminutes.toString() : tzminutes.toString();
+                tzhours = (tzhours.toString().length == 1) ? "0" +
+                                        tzhours.toString() : tzhours.toString();
+                var timezone = ((value.getTimezoneOffset() < 0) ? "+" : "-")
+                                                    + tzhours + ":" + tzminutes;
+
+                value = year + "-" + month + "-" + date + "T"
+                        + hours + ":" + minutes + ":" + seconds + "."
+                        + miliseconds + timezone;
+
+                parent.appendChild(doc.createTextNode(value));
+            }
+            else if (value instanceof Number) {
+                parent.appendChild(doc.createTextNode(value.toString()));
+            }
+            else if(value instanceof Array) {
+                this.__decode_array(doc, parent, value, cache, parent_defn);
+            }
+            else if (qx.xml.Document.isXmlDocument(value)) {
+                parent.appendChild(value);
+            }
+            else { // Object or custom function
+                var props = qx.util.PropertyUtil.getProperties(value.constructor);
+                for(var k in props) {
+                    if (props.hasOwnProperty(k)) {
+                        this.__decode_object_member(doc, parent, value,
+                                                         cache, parent_defn, k);
+                    }
+                }
+            }
+
+        }
+
         ,__serialize : function(doc, parent, value, cache, parent_defn) {
             var t = typeof(value);
-            var child;
-            var _ns_xsd = "http://www.w3.org/2001/XMLSchema"
             var _ns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
-
-            var child_defn;
 
             if (value == null) {
                 soap.Client.setAttributeNS(doc, parent, "xsi:nil", _ns_xsi, 1);
@@ -76,97 +141,22 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 parent.appendChild(doc.createTextNode(value.toString()));
             }
             else if (t == "object") {
-                if (value instanceof qx.locale.LocalizedString) {
-                    parent.appendChild(doc.createTextNode(value.toString()));
-                }
-                else if (value instanceof Date) {
-                    var year = value.getFullYear().toString();
-                    var month = (value.getMonth() + 1).toString();
-
-                    month = (month.length == 1) ? "0" + month : month;
-
-                    var date = value.getDate().toString();
-                    date = (date.length == 1) ? "0" + date : date;
-
-                    var hours = value.getHours().toString();
-                    hours = (hours.length == 1) ? "0" + hours : hours;
-
-                    var minutes = value.getMinutes().toString();
-                    minutes = (minutes.length == 1) ? "0" + minutes : minutes;
-
-                    var seconds = value.getSeconds().toString();
-                    seconds = (seconds.length == 1) ? "0" + seconds : seconds;
-
-                    var miliseconds = value.getMilliseconds().toString();
-                    while (miliseconds.length < 3) {
-                        miliseconds = "0" + miliseconds;
-                    }
-
-                    var tzminutes = Math.abs(value.getTimezoneOffset());
-                    var tzhours = 0;
-
-                    while(tzminutes >= 60) {
-                        tzhours++;
-                        tzminutes -= 60;
-                    }
-                    tzminutes = (tzminutes.toString().length == 1) ?
-                              "0" + tzminutes.toString() : tzminutes.toString();
-                    tzhours = (tzhours.toString().length == 1) ? "0" +
-                                        tzhours.toString() : tzhours.toString();
-                    var timezone = ((value.getTimezoneOffset() < 0) ? "+" : "-")
-                                                    + tzhours + ":" + tzminutes;
-
-                    value = year + "-" + month + "-" + date + "T"
-                            + hours + ":" + minutes + ":" + seconds + "."
-                            + miliseconds + timezone;
-
-                    parent.appendChild(doc.createTextNode(value));
-                }
-                else if (value instanceof Number) {
-                    parent.appendChild(doc.createTextNode(value.toString()));
-                }
-                // Array
-                else if(value instanceof Array) {
-                    for(var child_name in value) {
-                        if (value.hasOwnProperty(child_name)) {
-                            if(!isNaN(child_name)) { // contiguous array
-                                this.__decode_array(doc, parent, value, cache,
-                                                                   parent_defn);
-                                break;
-                            }
-                            else { // associative array
-                                child_defn = this.__get_child_defn(parent_defn, cache, child_name);
-                                child = soap.Client.createSubElementNS(doc,
-                                        parent, child_name, parent.namespaceURI);
-                                this.__serialize(doc, child, value[child_name],
-                                                             cache, child_defn);
-                            }
-                        }
-                    }
-                }
-                else if (qx.xml.Document.isXmlDocument(value)) {
-                    parent.appendChild(value);
-                }
-                else { // Object or custom function
-                    var props = qx.util.PropertyUtil.getProperties(
-                                                             value.constructor);
-                    for(var k in props) {
-                        if (props.hasOwnProperty(k)) {
-                            var getter = "get" + k;
-                            var data = value[getter]();
-
-                            var ns = eval(value.classname).TYPE_DEFINITION.ns;
-
-                            var key = k.slice(1);
-                            child = soap.Client.createSubElementNS(doc,
-                                                               parent, key, ns);
-
-                            child_defn = this.__get_child_defn(parent_defn, cache, key);
-                            this.__serialize(doc, child, data, cache, child_defn);
-                        }
-                    }
-                }
+                this.__decode_object(doc, parent, value, cache, parent_defn);
             }
+        }
+        
+        ,__decode_object_member: function(doc, parent, value, cache,
+                                                            parent_defn, name) {
+            var getter = "get" + name;
+            var data = value[getter]();
+
+            var ns = eval(value.classname).TYPE_DEFINITION.ns;
+
+            var key = name.slice(1);
+            var child = soap.Client.createSubElementNS(doc, parent, key, ns);
+            var child_defn = this.__get_child_defn(parent_defn, cache, key);
+
+            this.__serialize(doc, child, data, cache, child_defn);
         }
 
         ,add : function(name, value) {
@@ -197,11 +187,13 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
             for(var name in this.__pl) {
                 if (this.__pl.hasOwnProperty(name)) {
-                    var child_defn = this.__get_child_defn(parent_defn,cache,name);
+                    var child_defn = this.__get_child_defn(parent_defn, 
+                                                                   cache, name);
 
                     var child = soap.Client.createSubElementNS(doc, parent,
                                             name, cache.get_target_namespace());
-                    this.__serialize(doc, child, this.__pl[name], cache, child_defn);
+                    this.__serialize(doc, child, this.__pl[name], cache,
+                                                                    child_defn);
                 }
             }
         }
