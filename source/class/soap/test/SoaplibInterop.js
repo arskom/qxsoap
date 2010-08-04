@@ -153,5 +153,63 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
 
             this.__test_echo_array(service_name, val);
         }
+
+        // complex object tests
+
+        // misc tests
+        ,test_empty: function() {
+            var ctx=this;
+            var service_name = "test_empty";
+
+            ctx.c.easy(service_name
+                ,function(r) {
+                    ctx.resume(function() {
+                        
+                    });
+                });
+            ctx.wait();
+        }
+
+        ,test_multi_param: function() {
+            var service_name = "multi_param";
+            var ctx=this;
+            ctx.c.easy(service_name
+                ,"string"
+                ,123
+                ,new Date()
+                ,function(r) {
+                    ctx.resume(function() {
+
+                    });
+                });
+            ctx.wait();
+        }
+
+        ,test_return_only: function() {
+            var service_name = "return_only";
+            var ctx=this;
+            ctx.c.easy(service_name
+                ,function(r) {
+                    ctx.resume(function() {
+                        ctx.assertEquals(r, 'howdy');
+                    });
+                });
+            ctx.wait();
+        }
+
+        ,test_alternate_name: function() {
+            var service_name = "do_something";
+            var ctx=this;
+            var val = 'punk';
+
+            ctx.c.easy(service_name
+                ,'punk'
+                ,function(r) {
+                    ctx.resume(function() {
+                        ctx.assertEquals(r, val);
+                    });
+                });
+            ctx.wait();
+        }
     }
 });
