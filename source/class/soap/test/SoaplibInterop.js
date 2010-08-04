@@ -90,7 +90,7 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
         }
 
         ,test_echo_double : function() {
-            var val = 123132123.123981;
+            var val = 123132123.124;
             var service_name = "echo_double";
 
             this.__test_echo_primitive(service_name, val);
@@ -134,7 +134,7 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
         }
 
         ,test_echo_double_array : function() {
-            var val = [1123123123.12313123, 99999999.9999999];
+            var val = [1123123123.12, 12.34];
             var service_name = "echo_double_array";
 
             this.__test_echo_array(service_name, val);
