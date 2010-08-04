@@ -183,7 +183,7 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
             ctx.c.easy(service_name
                 ,function(r) {
                     ctx.resume(function() {
-                        
+
                     });
                 });
             ctx.wait();
