@@ -53,7 +53,7 @@ qx.Class.define("soap.ClientCollection", { extend: qx.core.Object
                             client.easy("!_name_!", callback);
                         }
                         catch(e) {
-                            
+
                         }
                     }
                     obj[parts[i]] = client;
