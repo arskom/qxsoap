@@ -35,15 +35,17 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
         catch(e) {
 
         }
+        this.ns = "soaplib.test.interop.server._service";
         qx.log.Logger.debug("hey.");
     }
 
     ,members : {
-         c : null
+          c : null
+         ,ns: null
 
         // helper functions
 
-        ,__test_echo_primitive: function(service_name, val, cb) {
+        ,__test_echo: function(service_name, val, cb) {
             var ctx = this;
 
             ctx.c.easy(service_name
@@ -64,7 +66,7 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
         ,__test_echo_array: function(service_name, val, cb) {
             var ctx = this;
 
-            ctx.__test_echo_primitive(service_name, val, function(r,v) {
+            ctx.__test_echo(service_name, val, function(r,v) {
                 for (var i=0,l=r.length; i<l; ++i) {
                     if (cb) {
                         cb(r,v,i);
@@ -79,46 +81,52 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
         // primitive tests
 
         ,test_echo_string : function() {
-            var val = "punk üğışçöÜĞİŞÇÖ";
             var service_name = "echo_string";
 
-            this.__test_echo_primitive(service_name, val);
+            var val = "punk üğışçöÜĞİŞÇÖ";
+
+            this.__test_echo(service_name, val);
         }
 
         ,test_echo_integer : function() {
-            var val = 10;
             var service_name = "echo_integer";
 
-            this.__test_echo_primitive(service_name, val);
+            var val = 10;
+
+            this.__test_echo(service_name, val);
         }
 
         ,test_echo_float : function() {
-            var val = 10.1;
             var service_name = "echo_float";
 
-            this.__test_echo_primitive(service_name, val);
+            var val = 10.1;
+
+            this.__test_echo(service_name, val);
         }
 
         ,test_echo_double : function() {
-            var val = 123132123.124;
             var service_name = "echo_double";
 
-            this.__test_echo_primitive(service_name, val);
+            var val = 123132123.124;
+
+            this.__test_echo(service_name, val);
         }
 
         ,test_echo_boolean : function() {
-            var val = true;
             var service_name = "echo_boolean";
 
-            this.__test_echo_primitive(service_name, val);
+            var val = true;
+
+            this.__test_echo(service_name, val);
         }
 
         ,test_echo_datetime : function() {
-            var ctx = this;
-            var val = new Date();
             var service_name = "echo_datetime";
 
-            this.__test_echo_primitive(service_name, val, function(r,v) {
+            var ctx = this;
+            var val = new Date();
+
+            this.__test_echo(service_name, val, function(r,v) {
                 ctx.assertEquals(r.getTime(), v.getTime());
             });
         }
@@ -126,36 +134,41 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
         // array tests
 
         ,test_echo_integer_array : function() {
-            var val = [1,3,5,7,11];
             var service_name = "echo_integer_array";
+
+            var val = [1,3,5,7,11];
 
             this.__test_echo_array(service_name, val);
         }
 
         ,test_echo_string_array : function() {
-            var val = ["hobaaa", "bir", "punk", "üğışçöÜĞİŞÇÖ"];
             var service_name = "echo_string_array";
+
+            var val = ["hobaaa", "bir", "punk", "üğışçöÜĞİŞÇÖ"];
 
             this.__test_echo_array(service_name, val);
         }
 
         ,test_echo_float_array : function() {
-            var val = [1.1, 3.3, 5.5, 7.7, 11.11];
             var service_name = "echo_float_array";
+
+            var val = [1.1, 3.3, 5.5, 7.7, 11.11];
 
             this.__test_echo_array(service_name, val);
         }
 
         ,test_echo_double_array : function() {
-            var val = [1123123123.12, 12.34];
             var service_name = "echo_double_array";
+
+            var val = [1123123123.12, 12.34];
 
             this.__test_echo_array(service_name, val);
         }
 
         ,test_echo_boolean_array : function() {
-            var val = [true,false,true];
             var service_name = "echo_boolean_array";
+
+            var val = [true,false,true];
 
             this.__test_echo_array(service_name, val);
         }
