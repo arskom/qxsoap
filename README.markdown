@@ -8,12 +8,17 @@ on Python 2.6.2, and with Qooxdoo 1.1.
 Using `qxsoap` in your application
 ==================================
 
-Modifiy the "let" and "jobs" sections to to contain the entries below:
+Download the latest package from http://github.com/arskom/qxsoap/downloads
+Unpack it to source/lib/soap folder in your project root. If you don't have
+a source/lib folder, it's OK to create it.
+
+Then modify the "let" and "jobs" sections in your `config.json` to to contain 
+the entries below:
 
     {
         "let" : {
-             "SOAP_PATH" : "./source/soap"
-            ,"SOAP_URI"  : "soap"
+             "SOAP_PATH" : "./source/lib/soap"
+            ,"SOAP_URI"  : "lib/soap"
         }
     
         ,"jobs" : {
@@ -24,6 +29,10 @@ Modifiy the "let" and "jobs" sections to to contain the entries below:
             }
         }
     }
+
+Use the soap client in your application, then run `./generate.py source` to 
+have it included. You can look at the [`soap.test.SoaplibInterop`](http://github.com/arskom/qxsoap/blob/master/source/class/soap/test/SoaplibInterop.js)
+class and the [demo application](http://github.com/arskom/qxsoap/tree/master/demo/default/source/class/soap/demo/) for examples.
 
 Running the demo
 ================
