@@ -46,7 +46,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 this.__serialize(doc, child, value[i], cache, child_defn);
             }
         }
-        
+
         ,__get_child_defn: function(parent_defn, cache, child_name) {
             var type_name = parent_defn.children[child_name].type
             var type_ns = parent_defn.children[child_name].ns
@@ -144,7 +144,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 this.__decode_object(doc, parent, value, cache, parent_defn);
             }
         }
-        
+
         ,__decode_object_member: function(doc, parent, value, cache,
                                                             parent_defn, name) {
             var getter = "get" + name;
@@ -187,7 +187,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
             for(var name in this.__pl) {
                 if (this.__pl.hasOwnProperty(name)) {
-                    var child_defn = this.__get_child_defn(parent_defn, 
+                    var child_defn = this.__get_child_defn(parent_defn,
                                                                    cache, name);
 
                     var child = soap.Client.createSubElementNS(doc, parent,
