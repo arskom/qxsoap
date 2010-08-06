@@ -19,3 +19,5 @@ nbproject
 /qooxdoo/readme.txt
 /qooxdoo/tool
 /qooxdoo/version.txt
+
+script/*.js
