@@ -8,3 +8,14 @@ nbproject
 
 # qooxdoo output
 /test
+
+# qooxdoo itself
+/qooxdoo/application
+/qooxdoo/component
+/qooxdoo/framework
+/qooxdoo/index.html
+/qooxdoo/license.txt
+/qooxdoo/put_qooxdoo_here
+/qooxdoo/readme.txt
+/qooxdoo/tool
+/qooxdoo/version.txt
