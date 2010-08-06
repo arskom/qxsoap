@@ -42,7 +42,7 @@ Preparing the client
 
 Unpack a qooxdoo distribution in the qooxdoo folder, or create symlinks to one.
 It has to be there so your web browser can find it via the included web server.
-Then run ./generate.py source in the client folder and generate the client
+Then run ./generate.py source in the `demo/default` folder and generate the client
 loader script.
 
 Preparing the server
