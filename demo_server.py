@@ -28,16 +28,16 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-import errno
-import sys
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('soaplib.wsgi')
+logger.setLevel(logging.DEBUG)
 
-import BaseHTTPServer
-import SimpleHTTPServer
-import SocketServer
-import os
-import socket
-import traceback
-import urlparse
+from twisted.python import log
+observer = log.PythonLoggingObserver('twisted')
+log.startLoggingWithObserver(observer.emit,setStdout=False)
+
+import sys
 
 from datetime import datetime
 
@@ -49,151 +49,7 @@ from soaplib.serializers.primitive import String
 from soaplib.service import rpc
 from soaplib.wsgi import Application
 from soaplib.service import DefinitionBase
-
-import logging
-logger = logging.getLogger('soaplib')
-logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-ch.setFormatter(formatter)
-logger.addHandler(ch)
-
-static_folder='/static/'
-class BasicWebServiceDaemon:
-    from cherrypy.wsgiserver import CherryPyWSGIServer
-
-    def __init__(self, func, server_address=("0.0.0.0", 8080)):
-        self.runbasic(func, server_address)
-
-    def runbasic(self, func, server_address):
-        """
-        Runs a simple HTTP server hosting WSGI app `func`. The directory
-        "static_folder" is hosted statically.
-
-        Based on [WsgiServer][ws] from [Colin Stewart][cs].
-
-        [ws]: http://www.owlfish.com/software/wsgiutils/documentation/wsgi-server-api.html
-        [cs]: http://www.owlfish.com/
-        """
-        # Copyright (c) 2004 Colin Stewart (http://www.owlfish.com/)
-        # Modified somewhat for simplicity
-        # Used under the modified BSD license:
-        # http://www.xfree86.org/3.3.6/COPYRIGHT2.html#5
-
-        class WSGIHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
-            def run_wsgi_app(self):
-                protocol, host, path, parameters, query, fragment = \
-                    urlparse.urlparse('http://dummyhost%s' % self.path)
-
-                # we only use path, query
-                env = {
-                    'wsgi.version': (1, 0),
-                    'wsgi.url_scheme': 'http',
-                    'wsgi.input': self.rfile,
-                    'wsgi.errors': sys.stderr,
-                    'wsgi.multithread': 1,
-                    'wsgi.multiprocess': 0,
-                    'wsgi.run_once': 0,
-                    'REQUEST_METHOD': self.command,
-                    'REQUEST_URI': self.path,
-                    'PATH_INFO': path,
-                    'QUERY_STRING': query,
-                    'CONTENT_TYPE': self.headers.get('Content-Type', ''),
-                    'CONTENT_LENGTH': self.headers.get('Content-Length', ''),
-                    'REMOTE_ADDR': self.client_address[0],
-                    'SERVER_NAME': self.server.server_address[0],
-                    'SERVER_PORT': str(self.server.server_address[1]),
-                    'SERVER_PROTOCOL': self.request_version,
-                }
-
-                for http_header, http_value in self.headers.items():
-                    env ['HTTP_%s' % http_header.replace('-', '_').upper()] = http_value
-
-                # Setup the state
-                self.wsgi_sent_headers = 0
-                self.wsgi_headers = []
-
-                try:
-                    # We have there environment, now invoke the application
-                    called=False
-                    if callable(self.server.app):
-                        result = self.server.app(env, self.wsgi_start_response)
-                        called=True
-                    else:
-                        for a in self.server.app:
-                            if a[0] == path:
-                                result = a[1](env, self.wsgi_start_response)
-                                called=True
-                                break
-
-                    if not called:
-                        result=['no service configured at path ' + path]
-                        self.wsgi_headers= ('404 ERR', [('Content-type', 'text/html')])
-
-                    try:
-                        try:
-                            for data in result:
-                                if data:
-                                    self.wsgi_write_data(data)
-                        finally:
-                            if hasattr(result, 'close'):
-                                result.close()
-                    except socket.error, socket_err:
-                        # Catch common network errors and suppress them
-                        if (socket_err.args[0] in (errno.ECONNABORTED, errno.EPIPE)):
-                            return
-                    except socket.timeout, socket_timeout:
-                        return
-                except Exception,e:
-                    print traceback.format_exc(),
-
-                if (not self.wsgi_sent_headers):
-                    # We must write out something!
-                    self.wsgi_write_data(" ")
-                return
-
-            do_POST = run_wsgi_app
-            do_PUT = run_wsgi_app
-            do_DELETE = run_wsgi_app
-
-            def do_GET(self):
-                if self.path.startswith(static_folder):
-                    self.path = '/'+'/'.join(self.path.split('/')[2:])
-                    SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
-                else:
-                    self.run_wsgi_app()
-
-            def wsgi_start_response(self, response_status, response_headers,
-                                exc_info=None):
-                if (self.wsgi_sent_headers):
-                    raise Exception("Headers already sent and start_response called again!")
-                # Should really take a copy to avoid changes in the application....
-                self.wsgi_headers = (response_status, response_headers)
-                return self.wsgi_write_data
-
-            def wsgi_write_data(self, data):
-                if (not self.wsgi_sent_headers):
-                    status, headers = self.wsgi_headers
-                    # Need to send header prior to data
-                    status_code = status[:status.find(' ')]
-                    status_msg = status[status.find(' ') + 1:]
-                    self.send_response(int(status_code), status_msg)
-                    for header, value in headers:
-                        self.send_header(header, value)
-                    self.end_headers()
-                    self.wsgi_sent_headers = 1
-                # Send the data
-                self.wfile.write(data)
-
-        class WSGIServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
-            def __init__(self, func, server_address):
-                BaseHTTPServer.HTTPServer.__init__(self, server_address, WSGIHandler)
-                self.app = func
-                self.serverShuttingDown = 0
-
-        print "http://%s:%d/" % server_address
-        WSGIServer(func, server_address).serve_forever()
+from soaplib.util.server import run_twisted
 
 class SOAPRequest(ClassSerializer):
     startrow = Integer
@@ -223,7 +79,7 @@ class NestedObject(ClassSerializer):
 #
 
 class HelloWorldService(DefinitionBase):
-    maxIntegerSize=5000 # adjust to your taste
+    max=5000 # adjust to your taste
 
     @rpc(String,Integer,_returns=Array(String))
     def say_hello(self,name,times):
@@ -256,7 +112,7 @@ class HelloWorldService(DefinitionBase):
 
     @rpc(SOAPRequest, _returns=Integer)
     def get_integers_count(self, req):
-        return self.maxIntegerSize
+        return self.max
 
     @rpc(_returns=String)
     def name (self):
@@ -278,14 +134,7 @@ class HelloWorldService(DefinitionBase):
 
         return retval
 
+apps = [ (Application([HelloWorldService],'HelloWorldService.HelloWorldService'), 'svc') ]
+
 if __name__=='__main__':
-    l=[ ('/svc/', Application(HelloWorldService)),
-        ('/svc.wsdl', Application(HelloWorldService)) ]
-
-    print 'cwd is %s' % os.getcwd()
-    if os.getcwd() != sys.path[0]:
-        os.chdir(sys.path[0])
-        print 'chdir to', sys.path[0]
-    print 'cwd is %s' % os.getcwd()
-
-    BasicWebServiceDaemon(l, ("0.0.0.0",7789))
+    sys.exit(run_twisted(apps, 7789))
