@@ -28,10 +28,12 @@
 
 qx.Class.define("soap.Call", {extend: qx.core.Object
     ,properties: {
-         _client : {check: "soap.Client"}
-        ,_params : {check: "soap.Parameters"}
-        ,_name : {check: "String"}
-        ,_simple : { check: "Boolean", init:false}
+         _name : {check: "String"}
+        ,_client : {check: "soap.Client"}
+        ,_params : {check: "soap.Parameters", init: null, nullable: true}
+        ,_simple : {check: "Boolean", init: false}
+        ,_errback : {check: "Function", init: null, nullable:true}
+        ,_callback : {check: "Function", init: null, nullable:true}
     }
 
     ,members: {
@@ -43,11 +45,11 @@ qx.Class.define("soap.Call", {extend: qx.core.Object
             client.easy.apply(client, args);
         }
 
-        ,callAsync: function(callback,errback) {
+        ,callAsync: function() {
             var client = this.get_client();
 
             client.callAsync(this.get_name(), this.get_params(),
-                                          this.get_simple(), callback, errback);
+                    this.get_simple(), this.get_callback(), this.get_errback());
         }
     }
 });
