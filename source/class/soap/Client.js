@@ -28,21 +28,6 @@
 
 qx.Class.define("soap.Client", {extend : qx.core.Object
     ,include : [qx.locale.MTranslation]
-    ,construct : function(url) {
-        this.base(arguments);
-
-        this.set_url(url)
-    }
-
-    ,events : {
-        "failed" : "qx.event.type.Event",
-        "wsdl_failed" : "qx.event.type.Event"
-    }
-
-    ,properties : {
-        _url : {check : "String"}
-    }
-
     ,statics : {
         TYPE_MAP : {
              "boolean": "Boolean"
@@ -134,9 +119,25 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             return retval;
         }
     }
+    ,construct : function(url) {
+        this.base(arguments);
+
+        this.set_url(url);
+        this.__queue = soap.CallQueue.getInstance();
+    }
+
+    ,events : {
+        "failed" : "qx.event.type.Event",
+        "wsdl_failed" : "qx.event.type.Event"
+    }
+
+    ,properties : {
+        _url : {check : "String"}
+    }
 
     ,members : {
          cache : null
+        ,__queue : null
 
         ,get_call: function(method_name) {
             var retval = new soap.Call();
@@ -152,7 +153,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             return this.cache.get_object(object_namespace, object_name);
         }
 
-        ,easy : function (method_name) {
+        ,__easy : function (method_name) {
             if (! method_name) {
                 throw new Error("method_name must be defined!");
             }
@@ -219,8 +220,34 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 args.add(method_input.children[i-1].name, arguments[i]);
             }
 
-            return this.__invoke(method_name, args, true, false, callback,
-                                                                       errback);
+            return [args, callback, errback]
+        }
+
+        ,easy: function() {
+            var ret = this.__easy.apply(this, arguments);
+
+            this.callAsync(arguments[0], ret[0], true, ret[1], ret[2]);
+        }
+        /*
+        ,easy: function() {
+            this.easy_deferred.apply(this, arguments);
+            this.__queue.flush();
+        }
+        */
+        ,easy_deferred: function() {
+            var ret = this.__easy.apply(this, arguments);
+
+            var call = this.get_call(arguments[0]);
+            call.set_client(this);
+            call.set_params(ret[0]);
+            call.set_simple(false);
+            call.set_callback(ret[1]);
+            call.set_errback(ret[2]);
+            this.__queue.add(call);
+        }
+
+        ,flush: function() {
+            this.__queue.flush();
         }
 
         ,__extract_fault : function(method_name, async, simple, req) {
