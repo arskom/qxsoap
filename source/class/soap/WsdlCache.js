@@ -61,39 +61,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         var port_type_node = get_elts(node, _ns_wsdl, 'portType')[0];
         var types_node = get_elts(node, _ns_wsdl, 'types')[0];
 
-        // fill methods
-        var methods = ctx.methods;
-        cn = port_type_node.childNodes;
-        for (i=0, l=cn.length; i<l; ++i) {
-            var method_name = cn[i].getAttribute("name");
-            methods[method_name] = new Object();
-
-            var method = methods[method_name];
-            for (j=0, k=cn[i].childNodes.length; j<k; ++j) {
-                var method_node = cn[i].childNodes[j];
-
-                if (qx.core.Variant.isSet("qx.client", "mshtml")) {
-                    tn = method_node.baseName;
-                }
-                else {
-                    tn = method_node.localName;
-                }
-
-                method.input = new Object();
-                method.input.name = null;
-                method.input.message = null;
-
-                method.output = new Object();
-                method.output.name = null;
-                method.output.message = null;
-
-                if (tn == "input" || tn == "output") {
-                    method[tn] = new Object();
-                    method[tn].name = method_node.getAttribute("name");
-                    method[tn].message = method_node.getAttribute("message");
-                }
-            }
-        }
+        this.__decode_methods(port_type_node);
 
         var schema_node = null;
         var n;
@@ -149,6 +117,43 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ,schema : null
         ,definitions : null
 
+        ,__decode_methods : function(port_type_node) {
+            // fill methods
+            var methods = this.methods;
+            var cn = port_type_node.childNodes;
+            for (var i=0, l=cn.length; i<l; ++i) {
+                var method_name = cn[i].getAttribute("name");
+                methods[method_name] = new Object();
+
+                var method = methods[method_name];
+                for (var j=0, k=cn[i].childNodes.length; j<k; ++j) {
+                    var method_node = cn[i].childNodes[j];
+
+                    var tn
+                    if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                        tn = method_node.baseName;
+                    }
+                    else {
+                        tn = method_node.localName;
+                    }
+
+                    method.input = new Object();
+                    method.input.name = null;
+                    method.input.message = null;
+
+                    method.output = new Object();
+                    method.output.name = null;
+                    method.output.message = null;
+
+                    if (tn == "input" || tn == "output") {
+                        method[tn] = new Object();
+                        method[tn].name = method_node.getAttribute("name");
+                        method[tn].message = method_node.getAttribute("message");
+                    }
+                }
+            }
+
+        }
         ,__decode_sequence : function(node, elt) {
             var first_node = node.firstChild;
             if (! first_node) {
