@@ -8,9 +8,9 @@ on Python 2.6.2, and with Qooxdoo 1.1.
 Using `qxsoap` in your application
 ==================================
 
-Download the latest package from http://github.com/arskom/qxsoap/downloads
-Unpack it to source/lib/soap folder in your project root. If you don't have
-a source/lib folder, it's OK to create it.
+Download the latest package from http://github.com/arskom/qxsoap/downloads and
+unpack it to source/lib/soap folder in your project root. If you don't have a
+`source/lib` folder, it's OK to create it.
 
 Then modify the "let" and "jobs" sections in your `config.json` to to contain 
 the entries below:
@@ -48,19 +48,24 @@ loader script.
 Preparing the server
 --------------------
 
-Chdir to the project directory (same as this README file) and run:
+Install the latest soaplib and twisted from pypi. As a priviledged user, you can 
+execute the following command:
 
-        git clone git://github.com/plq/soaplib.git ~/soaplib
-        export PYTHONPATH=$PYTHONPATH:~/soaplib/src
-        python soap_server.py
+    easy_install soaplib
+    easy_install twisted
 
-and wait for the
+Once soaplib and twisted are installed, you can run the demo server using the
+following command:
+
+    ./demo_server.py
+
+Wait for the
 
          http://0.0.0.0:7789/
 
 line to appear. Then navigate to:
 
-         http://localhost:7789/static/demo/default/source/
+         http://localhost:7789/demo/default/source/
 
 and you should see the main screen which is a toolbar with two buttons to the
 upper right.

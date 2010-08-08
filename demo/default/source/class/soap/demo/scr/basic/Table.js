@@ -75,4 +75,3 @@ qx.Class.define("soap.demo.scr.basic.Table", { extend : qx.core.Object
         lv.add(table, {flex:1});
     }
 });
-
