@@ -118,7 +118,6 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ,definitions : null
 
         ,__decode_methods : function(port_type_node) {
-            // fill methods
             var methods = this.methods;
             var cn = port_type_node.childNodes;
             for (var i=0, l=cn.length; i<l; ++i) {
@@ -152,8 +151,8 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     }
                 }
             }
-
         }
+
         ,__decode_sequence : function(node, elt) {
             var first_node = node.firstChild;
             if (! first_node) {
