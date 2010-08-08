@@ -120,8 +120,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     tn = cn[j].localName;
                 }
 
-                var elt = this.__type_from_node(cn[j]);
-                elt.ns = schema_tns;
+                var elt = this.__type_from_node(cn[j], schema_tns);
                 if (tn == "element") {
                     //schema.element[elt.name] = elt
                 }
@@ -129,26 +128,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
                 }
                 else if (tn == "simpleType") {
-                    schema.simple[elt.name] = elt
-
-                    for (n = cn[j].firstChild; n; n=n.nextSibling) {
-                        var nn;
-                        if (qx.core.Variant.isSet("qx.client", "mshtml")) {
-                            nn = n.baseName;
-                        }
-                        else {
-                            nn = n.localName;
-                        }
-
-                        if (nn == 'restriction') {
-                            elt.base = n.getAttribute("base");
-                            elt.base_ns = this.type_qname_to_ns(n,elt.base);
-                            elt.restrictions = new Object();
-                            for (var r = n.firstChild; r != null; r=r.nextSibling) {
-                                // TODO: fill restrictions
-                            }
-                        }
-                    }
+                    this.__decode_simple_type(cn[j],elt);
                 }
                 else if (tn == "complexType") {
                     elt.children = new Object();
@@ -202,11 +182,38 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ,schema : null
         ,definitions : null
 
-        ,__type_from_node: function(node) {
+        ,__decode_simple_type : function(node, elt) {
+            this.schema[elt.ns].simple[elt.name] = elt
+
+            for (var n = node.firstChild; n; n=n.nextSibling) {
+                var nn;
+                if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                    nn = n.baseName;
+                }
+                else {
+                    nn = n.localName;
+                }
+
+                if (nn == 'restriction') {
+                    elt.base = n.getAttribute("base");
+                    elt.base_ns = this.type_qname_to_ns(n,elt.base);
+                    elt.restrictions = new Object();
+                    for (var r = n.firstChild; r != null; r=r.nextSibling) {
+                        // TODO: fill restrictions
+                    }
+                }
+            }
+        }
+
+        ,__type_from_node: function(node, ns) {
             var elt = new Object();
 
             elt.type = node.getAttribute("type");
             elt.name = node.getAttribute("name");
+            if (ns) {
+                elt.ns = ns;
+            }
+
             if (elt.type) {
                 elt.ns = this.type_qname_to_ns(node, elt.type);
             }
@@ -261,12 +268,11 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                             var base_l = simple_type.base.split(":")[1];
                             simple_type = base_ns.simple[base_l];
 
-                            qx.core.Assert.assertNotUndefined(
-                                simple_type,
-                                "Simple Type " +
-                                "'{" + simple_type.base_ns + "}'" +
-                                " '" + simple_type.base + "' " +
-                                "does not exist");
+                            qx.core.Assert.assertNotUndefined(simple_type,
+                                    "Simple Type " +
+                                    "'{" + simple_type.base_ns + "}'" +
+                                    " '" + simple_type.base + "' " +
+                                    "does not exist");
                         }
                         else {
                             base_ns = null;
