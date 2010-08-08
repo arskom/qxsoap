@@ -113,21 +113,34 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
             cn = schema_node.childNodes;
             for (j=0, k = cn.length; j<k; ++j) {
-                tn = cn[j].tagName;
+                if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                    tn = cn[j].baseName;
+                }
+                else {
+                    tn = cn[j].localName;
+                }
 
                 var elt = this.__type_from_node(cn[j]);
                 elt.ns = schema_tns;
-                if (tn == "xs:element") {
+                if (tn == "element") {
                     //schema.element[elt.name] = elt
                 }
-                else if (tn == "xs:import") {
+                else if (tn == "import") {
 
                 }
-                else if (tn == "xs:simpleType") {
+                else if (tn == "simpleType") {
                     schema.simple[elt.name] = elt
 
-                    for (n = cn[j].firstChild; n != null; n=n.nextSibling) {
-                        if (n.nodeName == 'xs:restriction') {
+                    for (n = cn[j].firstChild; n; n=n.nextSibling) {
+                        var nn;
+                        if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                            nn = n.baseName;
+                        }
+                        else {
+                            nn = n.localName;
+                        }
+
+                        if (nn == 'restriction') {
                             elt.base = n.getAttribute("base");
                             elt.base_ns = this.type_qname_to_ns(n,elt.base);
                             elt.restrictions = new Object();
@@ -137,7 +150,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                         }
                     }
                 }
-                else if (tn == "xs:complexType") {
+                else if (tn == "complexType") {
                     elt.children = new Object();
                     var first_node = cn[j].childNodes[0];
                     var child;
