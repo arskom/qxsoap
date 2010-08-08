@@ -131,40 +131,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     this.__decode_simple_type(cn[j],elt);
                 }
                 else if (tn == "complexType") {
-                    elt.children = new Object();
-                    var first_node = cn[j].childNodes[0];
-                    var child;
-
-                    if (first_node.hasChildNodes()) {
-                        first_node = first_node.childNodes[0];
-
-                        var min_occurs = first_node.getAttribute("minOccurs");
-                        var max_occurs = first_node.getAttribute("maxOccurs");
-                        if (first_node.nextSibling == null && min_occurs != null
-                                                           && max_occurs != null) { // it's an array
-                            elt.is_array = true;
-                            elt.min_occurs = min_occurs;
-                            elt.max_occurs = max_occurs;
-
-                            child = this.__type_from_node(first_node);
-
-                            elt.children[child.name] = child;
-                            elt.children[0] = child;
-                        }
-                        else {
-                            var order=0;
-                            for (n=first_node; n!=null; n=n.nextSibling) {
-                                child = this.__type_from_node(n);
-
-                                elt.children[child.name] = child;
-                                elt.children[order] = child;
-
-                                ++order;
-                            }
-                        }
-                    }
-
-                    schema.complex[elt.name] = elt
+                    this.__decode_complex_type(cn[j],elt);
                 }
             }
         }
@@ -181,6 +148,43 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ,messages : null
         ,schema : null
         ,definitions : null
+
+        ,__decode_complex_type : function(node, elt) {
+            elt.children = new Object();
+            var first_node = node.childNodes[0];
+            var child;
+
+            if (first_node.hasChildNodes()) {
+                first_node = first_node.childNodes[0];
+
+                var min_occurs = first_node.getAttribute("minOccurs");
+                var max_occurs = first_node.getAttribute("maxOccurs");
+                if (first_node.nextSibling == null && min_occurs != null
+                                                   && max_occurs != null) { // it's an array
+                    elt.is_array = true;
+                    elt.min_occurs = min_occurs;
+                    elt.max_occurs = max_occurs;
+
+                    child = this.__type_from_node(first_node);
+
+                    elt.children[child.name] = child;
+                    elt.children[0] = child;
+                }
+                else {
+                    var order=0;
+                    for (n=first_node; n!=null; n=n.nextSibling) {
+                        child = this.__type_from_node(n);
+
+                        elt.children[child.name] = child;
+                        elt.children[order] = child;
+
+                        ++order;
+                    }
+                }
+            }
+
+            this.schema[elt.ns].complex[elt.name] = elt
+        }
 
         ,__decode_simple_type : function(node, elt) {
             this.schema[elt.ns].simple[elt.name] = elt
