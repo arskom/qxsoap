@@ -149,38 +149,59 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ,schema : null
         ,definitions : null
 
-        ,__decode_complex_type : function(node, elt) {
-            elt.children = new Object();
-            var first_node = node.childNodes[0];
+        ,__decode_sequence : function(node, elt) {
+            var first_node = node.firstChild;
+            if (! first_node) {
+                return;
+            }
+
             var child;
+            var min_occurs = first_node.getAttribute("minOccurs");
+            var max_occurs = first_node.getAttribute("maxOccurs");
+            if (first_node.nextSibling == null && min_occurs != null
+                                               && max_occurs != null) { // it's an array
+                elt.is_array = true;
+                elt.min_occurs = min_occurs;
+                elt.max_occurs = max_occurs;
 
-            if (first_node.hasChildNodes()) {
-                first_node = first_node.childNodes[0];
+                child = this.__type_from_node(first_node);
 
-                var min_occurs = first_node.getAttribute("minOccurs");
-                var max_occurs = first_node.getAttribute("maxOccurs");
-                if (first_node.nextSibling == null && min_occurs != null
-                                                   && max_occurs != null) { // it's an array
-                    elt.is_array = true;
-                    elt.min_occurs = min_occurs;
-                    elt.max_occurs = max_occurs;
+                elt.children = new Object();
+                elt.children[child.name] = child;
+                elt.children[0] = child;
+            }
+            else {
+                var order=0;
+                elt.children = new Object();
 
-                    child = this.__type_from_node(first_node);
+                for (var n=first_node; n!=null; n=n.nextSibling) {
+                    child = this.__type_from_node(n);
 
                     elt.children[child.name] = child;
-                    elt.children[0] = child;
-                }
-                else {
-                    var order=0;
-                    for (n=first_node; n!=null; n=n.nextSibling) {
-                        child = this.__type_from_node(n);
+                    elt.children[order] = child;
 
-                        elt.children[child.name] = child;
-                        elt.children[order] = child;
-
-                        ++order;
-                    }
+                    ++order;
                 }
+            }
+        }
+
+        ,__decode_complex_type : function(node, elt) {
+            var first_node = node.firstChild;
+            if (! first_node) {
+                return;
+            }
+
+            var child;
+            var tn;
+            if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                tn = first_node.baseName;
+            }
+            else {
+                tn = first_node.localName;
+            }
+
+            if (tn == 'sequence') {
+                this.__decode_sequence(first_node, elt);
             }
 
             this.schema[elt.ns].complex[elt.name] = elt
