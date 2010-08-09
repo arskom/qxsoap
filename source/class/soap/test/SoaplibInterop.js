@@ -215,7 +215,7 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
 
             this.__test_other_class(r.get_other(), v.get_other());
             this.__test_non_nillable_class(r.get_p(), v.get_p());
-            this.assertEquals(r.get_l(), v.get_l());
+            this.assertEquals(r.get_l().getTime(), v.get_l().getTime());
             this.assertEquals(r.get_q(), v.get_q());
         }
 

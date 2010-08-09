@@ -36,6 +36,7 @@ qx.Class.define("soap.ClientCollection", { extend: qx.core.Object
     }
     ,members: {
          c: null
+
         ,add_address: function(address, callback) {
             var parts = address.split('/');
             var obj = this.c;

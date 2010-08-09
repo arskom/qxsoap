@@ -34,6 +34,10 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ,_simple : {check: "Boolean", init:false}
     }
 
+    ,statics : {
+        nsmap: new Object()
+    }
+
     ,construct: function(node) {
         var ctx = this;
         var get_elts = qx.xml.Element.getElementsByTagNameNS;
@@ -73,6 +77,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             var schema = ctx.schema[schema_key];
             if (! schema) {
                 ctx.schema[schema_key] = new Object();
+
                 schema = ctx.schema[schema_key];
                 schema.simple = new Object();
                 schema.element = new Object();
@@ -90,7 +95,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
                 var elt = this.__type_from_node(cn[j], schema_tns);
                 if (tn == "element") {
-                    //schema.element[elt.name] = elt
+                    schema.element[elt.name] = elt
                 }
                 else if (tn == "import") {
 
@@ -195,7 +200,6 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                 return;
             }
 
-            var child;
             var tn;
             if (qx.core.Variant.isSet("qx.client", "mshtml")) {
                 tn = first_node.baseName;
@@ -207,8 +211,40 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             if (tn == 'sequence') {
                 this.__decode_sequence(first_node, elt);
             }
+            if (tn == 'complexContent') {
+                this.__decode_complex_content(first_node, elt);
+            }
 
+            //elt.type = this.__target_namespace
             this.schema[elt.ns].complex[elt.name] = elt
+        }
+
+        ,__decode_complex_content : function(node, elt) {
+            var first_node = node.firstChild;
+            if (! first_node) {
+                return;
+            }
+
+            var tn;
+            if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                tn = first_node.baseName;
+            }
+            else {
+                tn = first_node.localName;
+            }
+
+            if (tn == 'extension') {
+                var type_qname = first_node.getAttribute("base");
+                var type_local = type_qname.split(":")[1];
+                var type_ns = this.type_qname_to_ns(node, type_qname);
+
+                elt.base = type_local;
+                elt.base_ns = type_ns;
+
+                if (first_node.firstChild) {
+                    this.__decode_sequence(first_node.firstChild, elt);
+                }
+            }
         }
 
         ,__decode_simple_type : function(node, elt) {
@@ -271,6 +307,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
                     if (retval) {
                         this.__prefix_map[type_defn[0]] = retval;
+                        soap.WsdlCache.nsmap[retval] = type_defn[0];
                     }
                 }
             }
@@ -350,8 +387,14 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             }
             else {
                 var children = type.children;
+                var extend = qx.core.Object;
+                if (type.base) {
+                    extend = this.get_class(type.base_ns, type.base);
+                    qx.log.Logger.debug("base: " + type.base_ns + "." + type.base);
+                }
+
                 retval = {
-                    extend: qx.core.Object,
+                    extend: extend,
                     properties: {},
                     statics: {
                         TYPE_DEFINITION: type

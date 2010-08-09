@@ -98,7 +98,8 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 // mozilla engine assigns an alternative prefix automatically.
                 // not putting a prefix means to assign default namespace prefix
                 // to the given namespace uri.
-                retval = doc.createElementNS(ns, "x:" + name);
+                var pref =  soap.WsdlCache.nsmap[ns] || 'x';
+                retval = doc.createElementNS(ns, pref + ":" + name);
             }
 
             parent.appendChild(retval);
@@ -340,7 +341,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 }
             }
             else {
-                var props = qx.util.PropertyUtil.getProperties(
+                var props = qx.util.PropertyUtil.getAllProperties(
                                                             retval.constructor);
                 for (k in props) {
                     if (props.hasOwnProperty(k)) {
@@ -368,9 +369,22 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             return retval;
         }
 
+        ,__is_simple_type : function(type_ns, type_local) {
+            var _ns_xsd = "http://www.w3.org/2001/XMLSchema";
+            var retval = (type_ns == _ns_xsd);
+
+            if (! retval) {
+                var s = this.cache.schema[type_ns]
+                if (s) {
+                    retval = s.simple[type_local]
+                }
+            }
+
+            return retval;
+        }
+
         ,__extract : function(node, simple, parent_defn) {
             var retval = null;
-            var _ns_xsd = "http://www.w3.org/2001/XMLSchema";
 
             var is_null = node.getAttribute("xsi:nil");
             if (is_null == "true") {
@@ -387,7 +401,8 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 return null;
             }
 
-            if (type_ns == _ns_xsd) {
+            var ret = this.__is_simple_type(type_ns, type_local)
+            if (ret) {
                 var value = node.nodeValue;
                 if (value == null) {
                     var first_child = node.firstChild;
@@ -397,6 +412,12 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     else {
                         value = first_child.nodeValue; // this is to get the textNode
                     }
+                }
+
+                if (ret !== true) {
+                    type_name = ret.base; // FIXME: not recursive
+                    type_local = type_name.split(":")[1];
+                    type_local_l = type_local.toLowerCase();
                 }
 
                 if (type_local_l != "string" && value === "") {
@@ -462,6 +483,9 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 // soap request.
                 var defn = this.cache.schema[type_ns].complex[type_local];
 
+                if (! defn) {
+                    defn = this.cache.schema[type_ns].simple[type_local];
+                }
                 // if the definition can't be found, fetch the definition using
                 // the children list in the parent's wsdl declaration.
                 if (! defn) {
@@ -475,7 +499,26 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                         parent_defn = parent_schema.complex[parent_local];
                     }
 
-                    type_name = parent_defn.children[type_local].type;
+                    var pd = parent_defn;
+                    var simple_def = pd.children[type_local];
+                    while ( (! simple_def) && pd && pd.base) {
+                        var b_schema = this.cache.schema[pd.base_ns];
+                        if (b_schema) {
+                            var td = b_schema.complex[pd.base]
+                            if (td) {
+                                simple_def = td.children[type_local];
+                                pd = td.base;
+                            }
+                            else {
+                                break;
+                                }
+                        }
+                        else {
+                            break;
+                        }
+                    }
+
+                    type_name = simple_def.type;
                     type_ns = this.cache.type_qname_to_ns(node, type_name)
                     type_local = type_name.split(":")[1];
 
