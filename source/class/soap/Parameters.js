@@ -29,7 +29,7 @@
 qx.Class.define("soap.Parameters", {extend : qx.core.Object
     ,include : [qx.locale.MTranslation]
     ,construct : function() {
-        this.__pl=new Object();
+        this.__pl = new Object();
     }
 
     ,members : {
