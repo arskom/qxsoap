@@ -32,6 +32,10 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
         this.__pl = new Object();
     }
 
+    ,properties : {
+        _soap_req_header : {check: "soap.RequestHeader", init: null, nullable: true}
+    }
+
     ,members : {
         __pl : null
 
