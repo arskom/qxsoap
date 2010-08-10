@@ -126,7 +126,19 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 this.__decode_array(doc, parent, value, cache, parent_defn);
             }
             else if (qx.xml.Document.isXmlDocument(value)) {
-                parent.appendChild(value);
+                try {
+                    parent.appendChild(value);
+                }
+                catch (e) {
+                    var cloned_node;
+                    if (value.ownerDocument.importNode) {
+                        cloned_node = value.ownerDocument.importNode(value,true);
+                    }
+                    else {
+                        cloned_node = value.parentDocument.cloneNode(true);
+                    }
+                    parent.appendChild(cloned_node);
+                }
             }
             else { // Object or custom function
                 var ctx = this;
