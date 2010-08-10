@@ -152,6 +152,44 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             if (retval == null) {
                 retval = node.nodeName
 
+                if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                    local = node.baseName;
+                }
+                else {
+                    local = node.localName;
+                }
+
+
+                var ns = node.namespaceURI;
+
+                s = this.cache.schema[ns];
+                if (s) {
+                    c=s.complex[retval.split(":")[1]];
+                    if (! c) {
+                        retval = null;
+                    }
+                }
+                else {
+                    retval = null;
+                }
+            }
+
+            if (retval == null) {
+                var parent_type_name = this.get_type_name_from_node(
+                                                               node.parentNode);
+                var parent_ns = node.parentNode.namespaceURI;
+                var parent_local = parent_type_name.split(":")[1];
+
+                s = this.cache.schema[parent_ns];
+                if (s) {
+                    c = s.complex[parent_local];
+                    if (c) {
+                        t = c.children[local];
+                        if (t) {
+                            retval = t.type
+                        }
+                    }
+                }
             }
 
             return retval;
