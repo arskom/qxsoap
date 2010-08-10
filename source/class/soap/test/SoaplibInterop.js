@@ -88,6 +88,37 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
             this.__test_echo(service_name, val);
         }
 
+        ,__get_xml_test_val : function() {
+            var doc = qx.xml.Document.create();
+            var sub=soap.Client.createSubElementNS(doc, doc, "test_sub", "test_ns");
+            var subsub1=soap.Client.createSubElementNS(doc, sub, "test_subsub1", "test_ns");
+            var subsubsub1=soap.Client.createSubElementNS(doc, subsub1, "test_subsubsub1", "test_ns");
+            var subsub2=soap.Client.createSubElementNS(doc, sub, "test_subsubsub1", "test_ns");
+            var subsub3=soap.Client.createSubElementNS(doc, sub, "test_subsubsub1", "test_ns");
+
+            subsub2.nodeValue = "subsub2 value";
+            subsub3.nodeValue = "subsub3 value";
+            subsubsub1.nodeValue = "subsubsub1 value";
+
+            return doc;
+        }
+
+        ,test_echo_any : function() {
+            var service_name = "echo_any";
+
+            var val = this.__get_xml_test_val();
+
+            this.__test_echo(service_name, val);
+        }
+
+        ,test_echo_any_as_dict : function() {
+            var service_name = "echo_any_as_dict";
+
+            var val = this.__get_xml_test_val();
+
+            this.__test_echo(service_name, val);
+        }
+
         ,test_echo_integer : function() {
             var service_name = "echo_integer";
 
