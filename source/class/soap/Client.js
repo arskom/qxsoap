@@ -685,18 +685,18 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             return retval;
         }
 
-        ,__send_soap_request : function(method_, parameters, async, simple,
+        ,__send_soap_request : function(method_name, parameters, async, simple,
                                                             callback, errback) {
+            var _ns_soap = "http://schemas.xmlsoap.org/soap/envelope/"
+            var _ns_tns = this.cache.get_target_namespace();
+
             var sub_element = soap.Client.createSubElementNS;
             var retval;
 
-            var _ns_soap = "http://schemas.xmlsoap.org/soap/envelope/"
-            var _ns_tns = this.cache.get_target_namespace();
 
             // build SOAP request
             var doc = qx.xml.Document.create()
             var envelope = sub_element(doc, doc,"Envelope", _ns_soap);
-
             parameters.to_xml(doc, envelope, this.cache, method_name);
 
             // send request
@@ -704,7 +704,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             xml_http.open("POST", this.get_url(), async);
 
             var soapaction = ((_ns_tns.lastIndexOf("/") != _ns_tns.length - 1) ?
-                                             _ns_tns + "/" : _ns_tns) + method_;
+                                         _ns_tns + "/" : _ns_tns) + method_name;
             xml_http.setRequestHeader("SOAPAction", soapaction);
             xml_http.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
 
@@ -712,7 +712,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 var ctx = this;
                 xml_http.onreadystatechange = function() {
                     if(xml_http.readyState == 4) { /* FIXME: No magic numbers! */
-                        ctx.__on_send_soap_request(method_, async, simple,
+                        ctx.__on_send_soap_request(method_name, async, simple,
                                                     callback, errback, xml_http);
                     }
                 }
@@ -720,7 +720,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
             xml_http.send(qx.xml.Element.serialize(doc));
             if (!async) {
-                retval = this.__on_send_soap_request(method_, async, simple,
+                retval = this.__on_send_soap_request(method_name, async, simple,
                                                     callback, errback, xml_http);
             }
 
