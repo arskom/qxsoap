@@ -215,7 +215,6 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                 this.__decode_complex_content(first_node, elt);
             }
 
-            //elt.type = this.__target_namespace
             this.schema[elt.ns].complex[elt.name] = elt
         }
 
