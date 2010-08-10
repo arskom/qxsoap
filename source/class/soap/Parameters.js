@@ -217,23 +217,27 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             return this.__pl[name];
         }
 
-        ,to_xml : function(doc, parent, cache) {
-            var p_ns = parent.namespaceURI;
-            var p_ln;
+        ,to_xml : function(doc, parent, cache, method_name) {
+            var _ns_soap = "http://schemas.xmlsoap.org/soap/envelope/"
+            //var _ns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
+            var _ns_tns = cache.get_target_namespace();
+            var sub_element = soap.Client.createSubElementNS;
 
-            if (qx.core.Variant.isSet("qx.client", "mshtml")) {
-                p_ln = parent.baseName;
-            }
-            else {
-                p_ln = parent.localName;
+
+            var soap_req_header = this.get_soap_req_header();
+            if (soap_req_header) {
+                var header = sub_element(doc, parent, "Header", _ns_soap);
+                this.__serialize(doc, header, soap_req_header, cache,
+                                                                    child_defn);
             }
 
-            var parent_defn = cache.schema[p_ns].complex[p_ln];
-            var _ns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
+            var body = sub_element(doc, parent, "Body", _ns_soap);
+            var call = sub_element(doc, body, method_name, _ns_tns);
+            var parent_defn = cache.schema[_ns_tns].complex[method_name];
 
             for(var name in this.__pl) {
                 if (this.__pl.hasOwnProperty(name)) {
-                    var child = soap.Client.createSubElementNS(doc, parent,
+                    var child = soap.Client.createSubElementNS(doc, call,
                                             name, cache.get_target_namespace());
 
                     var child_defn = this.__get_child_defn(parent_defn,
