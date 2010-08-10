@@ -93,12 +93,12 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
             var sub=soap.Client.createSubElementNS(doc, doc, "test_sub", "test_ns");
             var subsub1=soap.Client.createSubElementNS(doc, sub, "test_subsub1", "test_ns");
             var subsubsub1=soap.Client.createSubElementNS(doc, subsub1, "test_subsubsub1", "test_ns");
-            var subsub2=soap.Client.createSubElementNS(doc, sub, "test_subsubsub1", "test_ns");
-            var subsub3=soap.Client.createSubElementNS(doc, sub, "test_subsubsub1", "test_ns");
+            var subsub2=soap.Client.createSubElementNS(doc, sub, "test_subsub2", "test_ns");
+            var subsub3=soap.Client.createSubElementNS(doc, sub, "test_subsub3", "test_ns");
 
+            subsubsub1.nodeValue = "subsubsub1 value";
             subsub2.nodeValue = "subsub2 value";
             subsub3.nodeValue = "subsub3 value";
-            subsubsub1.nodeValue = "subsubsub1 value";
 
             return sub;
         }
