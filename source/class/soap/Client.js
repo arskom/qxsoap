@@ -350,9 +350,13 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                         errorback(retval, req.responseXML);
                     }
                     else {
-                        var msg = this.tr("An error has occurred!") + "\n"
-                                        + retval.fileName + "\n";
-                                        //+ ">>> " + retval.lineNumber;
+                        var msg = this.tr("A '" + retval.name + "' has occurred!") + "\n"
+                                        + retval.message + "\n";
+
+                        if (qx.core.Variant.isSet("qx.debug", "on")) {
+                            msg += retval.fileName + ":" + retval.lineNumber + "\n\n"
+                                    + retval.stack;
+                        }
 
                         alert(msg);
                     }
