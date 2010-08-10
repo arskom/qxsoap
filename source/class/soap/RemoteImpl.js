@@ -83,17 +83,15 @@ qx.Class.define("soap.RemoteImpl", { extend : qx.ui.table.model.Remote
             var args = ctx.__args;
 
             // construct request object
-            var req = args.get_argument("req");
+            var header = soap.RequestHeader();
 
-            var sort_column_index = (this.getSortColumnIndex() != -1 ?
-                                                 this.getSortColumnIndex() : 0);
+            if (this.getSortColumnIndex() >= 0) {
+                header.set_sort_key(this.getSortColumnIndex());
+            }
 
-            var sort_order = this.isSortAscending() ? "d" : "a";
-
-            req.set_sort_by(sort_column_index);
-            req.set_sort_ord(sort_order);
-            req.set_startrow(first_row);
-            args.add("req",req);
+            header.set_sort_ord(this.isSortAscending() ? "d" : "a");
+            header.set_startrow(first_row);
+            args.set_header(header);
 
             // issue soap call
             svc.callAsync(this.__data_method_name, args,

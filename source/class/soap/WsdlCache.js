@@ -291,6 +291,9 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         }
 
         ,type_qname_to_ns: function(node, type_qname) {
+            if (! type_qname) {
+                return null;
+            }
             var type_defn = type_qname.split(":");
             var retval;
 

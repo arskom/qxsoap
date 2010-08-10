@@ -159,7 +159,6 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     local = node.localName;
                 }
 
-
                 var ns = node.namespaceURI;
 
                 s = this.cache.schema[ns];
@@ -187,6 +186,18 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                         t = c.children[local];
                         if (t) {
                             retval = t.type
+                        }
+                        else while(c.base) {
+                            c = this.cache.schema[c.base_ns].complex[c.base];
+                            if (c) {
+                                t = c.children[local];
+                                if (t) {
+                                    retval = t.type;
+                                }
+                            }
+                            else {
+                                break;
+                            }
                         }
                     }
                 }
