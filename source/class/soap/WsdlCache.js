@@ -48,7 +48,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ctx.schema = new Object();
         ctx.__target_namespace = node.documentElement.getAttribute(
                                                              "targetNamespace");
-        ctx.__prefix_map = new Object();
+        ctx.prefix_map = new Object();
 
         qx.log.Logger.debug("New service: " + ctx.__target_namespace);
 
@@ -296,17 +296,21 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             var retval;
 
             if (type_defn.length > 0) {
-                retval = this.__prefix_map[type_defn[0]];
+                retval = this.prefix_map[type_defn[0]];
 
                 if (! retval) {
                     var tnode = node;
                     while (! retval) {
+                        if (! tnode.getAttribute) {
+                            return retval;
+                        }
+
                         retval = tnode.getAttribute("xmlns:" + type_defn[0]);
                         tnode = tnode.parentNode;
                     }
 
                     if (retval) {
-                        this.__prefix_map[type_defn[0]] = retval;
+                        this.prefix_map[type_defn[0]] = retval;
                         soap.WsdlCache.nsmap[retval] = type_defn[0];
                     }
                 }
