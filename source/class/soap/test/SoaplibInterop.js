@@ -100,7 +100,7 @@ qx.Class.define("soap.test.SoaplibInterop", { extend : qx.dev.unit.TestCase,
             subsub3.nodeValue = "subsub3 value";
             subsubsub1.nodeValue = "subsubsub1 value";
 
-            return doc;
+            return sub;
         }
 
         ,test_echo_any : function() {
