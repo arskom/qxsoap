@@ -361,8 +361,9 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                         errorback(retval, req.responseXML);
                     }
                     else {
-                        var msg = this.tr("A '" + retval.name + "' has occurred!") + "\n"
-                                        + retval.message + "\n";
+                        var msg = this.tr("A '") + retval.name +
+                            this.tr("' has occurred!") + "\n" +
+                            retval.message + "\n";
 
                         if (qx.core.Variant.isSet("qx.debug", "on")) {
                             msg += retval.fileName + ":" + retval.lineNumber + "\n\n"
