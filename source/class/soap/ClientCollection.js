@@ -27,12 +27,29 @@
  */
 
 qx.Class.define("soap.ClientCollection", { extend: qx.core.Object
-    ,construct: function(url) {
+    ,construct: function(url, client_class, header_class) {
         this.c = new Object();
         this.set_url(url);
+
+        if (client_class) {
+            this.set_client_class(client_class);
+        }
+        else {
+            this.set_client_class(soap.Client);
+        }
+
+        if (header_class) {
+            this.set_header_class(header_class);
+        }
+        else {
+            this.set_header_class(soap.RequestHeader);
+        }
+
     }
     ,properties : {
-        _url :{check:"String"}
+         _url : {check:"String"}
+        ,_client_class : {check: "Function"}
+        ,_header_class : {check: "Function"}
     }
     ,members: {
          c: null
@@ -46,7 +63,9 @@ qx.Class.define("soap.ClientCollection", { extend: qx.core.Object
 
                 if (i == l-1) {
                     var curl = this.get_url() + "/" + caddr + "/";
-                    var client = new soap.Client(curl);
+                    var c_class = this.get_client_class();
+                    var h_class = this.get_header_class();
+                    var client = new c_class(curl, h_class);
                     if (callback) {
                         try {
                             // this is just to have the wsdl requested, so the

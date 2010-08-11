@@ -33,7 +33,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
     }
 
     ,properties : {
-        _soap_req_header : {check: "soap.RequestHeader", init: null, nullable: true}
+        _soap_req_header : {init: null, nullable: true}
     }
 
     ,members : {
@@ -53,12 +53,10 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
         ,__get_child_defn: function(parent_defn, cache, child_name) {
             var child_defn = parent_defn.children[child_name]
-            while (! child_defn) {
-                var parent_base = parent_defn.base;
-                if (parent_base) {
-                    child_defn = cache.schema[parent_defn.base_ns].complex[
-                                              parent_base].children[child_name];
-                }
+            var defn = parent_defn;
+            while ( defn.base && (! child_defn)) {
+                defn = cache.schema[defn.base_ns].complex[defn.base];
+                child_defn = defn.children[child_name];
             }
 
             var type_name = child_defn.type
@@ -69,6 +67,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             if (cache.schema[type_ns]) {
                 retval = cache.schema[type_ns].complex[type_local];
             }
+
             return retval;
         }
 
@@ -132,10 +131,10 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 catch (e) {
                     var cloned_node;
                     if (value.ownerDocument.importNode) {
-                        cloned_node = value.ownerDocument.importNode(value,true);
+                        cloned_node = parent.ownerDocument.importNode(value,true);
                     }
                     else {
-                        cloned_node = value.parentDocument.cloneNode(true);
+                        cloned_node = parent.ownerDocument.cloneNode(true);
                     }
                     parent.appendChild(cloned_node);
                 }
@@ -184,18 +183,25 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
         ,__decode_object_member: function(doc, parent, value, cache,
                                                             parent_defn, name) {
-            var _ns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
             var getter = "get" + name;
+            var key = name.slice(1);
             var data = value[getter]();
 
-            var ns = eval(value.classname).TYPE_DEFINITION.ns;
+            var child_defn;
+            var td = eval(value.classname).TYPE_DEFINITION, ns;
+            if (td) {
+                ns = td.ns;
+                child_defn = this.__get_child_defn(parent_defn, cache, key);
+            }
+            else {
+                ns = "qxsoap.internal";
+            }
 
-            var key = name.slice(1);
             var child = soap.Client.createSubElementNS(doc, parent, key, ns);
-            var child_defn = this.__get_child_defn(parent_defn, cache, key);
 
             /*
             if (child_defn) {
+                var _ns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
                 soap.Client.setAttributeNS(doc, child, "xsi:type", _ns_xsi,
                     cache.schema[child_defn.ns].element[child_defn.name].type);
             }
@@ -225,7 +231,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
 
             var soap_req_header = this.get_soap_req_header();
-            if (soap_req_header) {
+            if (soap_req_header != null) {
                 var header = sub_element(doc, parent, "Header", _ns_soap);
                 this.__serialize(doc, header, soap_req_header, cache,
                                                                     child_defn);

@@ -28,6 +28,11 @@
 
 qx.Class.define("soap.Client", {extend : qx.core.Object
     ,include : [qx.locale.MTranslation]
+    ,properties : {
+         _url : {check : "String"}
+        ,_header_class : {check: "Function"}
+    }
+
     ,statics : {
         TYPE_MAP : {
              "boolean": "Boolean"
@@ -107,20 +112,23 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             return retval;
         }
     }
-    ,construct : function(url) {
+    ,construct : function(url, header_class) {
         this.base(arguments);
 
         this.set_url(url);
         this.__queue = soap.CallQueue.getInstance();
+
+        if (header_class) {
+            this.set_header_class(header_class);
+        }
+        else {
+            this.set_header_class(soap.RequestHeader);
+        }
     }
 
     ,events : {
         "failed" : "qx.event.type.Event",
         "wsdl_failed" : "qx.event.type.Event"
-    }
-
-    ,properties : {
-        _url : {check : "String"}
     }
 
     ,members : {
@@ -267,13 +275,17 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
                 if (! child_type) {
                     throw new Error("Too many arguments for function '"
-                                                              +method_name+"'");
+                                                           + method_name + "'");
                 }
 
                 args.add(method_input.children[i-1].name, arguments[i]);
             }
 
             return [args, callback, errback]
+        }
+
+        ,alter_args: function(args) {
+
         }
 
         ,easy: function() {
@@ -640,6 +652,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
         ,__invoke : function(method_name, parameters, async, simple, callback,
                                                                       errback) {
             var retval;
+            this.alter_args(parameters);
 
             if(async) {
                 this.__load_wsdl(method_name, parameters, async, simple,
