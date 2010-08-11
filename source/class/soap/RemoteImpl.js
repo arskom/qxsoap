@@ -94,7 +94,7 @@ qx.Class.define("soap.RemoteImpl", { extend : qx.ui.table.model.Remote
                 header.set_sort_ord(this.isSortAscending() ? "d" : "a");
             }
 
-            header.set_start_row(first_row);
+            header.set_row(first_row);
             args.set_soap_req_header(header);
 
             // issue soap call
