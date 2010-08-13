@@ -90,7 +90,7 @@ qx.Class.define("soap.RemoteImpl", { extend : qx.ui.table.model.Remote
             }
 
             if (this.getSortColumnIndex() >= 0) {
-                header.set_sort_key(this.getColumnName(this.getSortColumnIndex()));
+                header.set_sort_key(this.getColumnId(this.getSortColumnIndex()));
                 header.set_sort_ord(this.isSortAscending() ? "d" : "a");
             }
 
