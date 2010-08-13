@@ -129,12 +129,14 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                     parent.appendChild(value);
                 }
                 catch (e) {
-                    var cloned_node;
-                    if (value.ownerDocument.importNode) {
-                        cloned_node = parent.ownerDocument.importNode(value,true);
-                    }
-                    else {
-                        cloned_node = parent.ownerDocument.cloneNode(true);
+                    var cloned_node = value;
+                    if (value.ownerDocument) {
+                        if (value.ownerDocument.importNode) {
+                            cloned_node = parent.ownerDocument.importNode(value,true);
+                        }
+                        else {
+                            cloned_node = parent.ownerDocument.cloneNode(true);
+                        }
                     }
                     parent.appendChild(cloned_node);
                 }
