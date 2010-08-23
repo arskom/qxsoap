@@ -59,59 +59,11 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             this.definitions = node.childNodes[0];
         }
 
-        var cn = this.definitions.childNodes;
-
-        var i,l,j,k,tn;
         var port_type_node = get_elts(node, _ns_wsdl, 'portType')[0];
         var types_node = get_elts(node, _ns_wsdl, 'types')[0];
 
         this.__decode_methods(port_type_node);
-
-        var schema_node = null;
-        var n;
-        for (i=0, l=types_node.childNodes.length; i<l; ++i) {
-            schema_node = types_node.childNodes[i];
-            var schema_tns = schema_node.getAttribute("targetNamespace");
-            var schema_key = schema_tns;
-
-            var schema = ctx.schema[schema_key];
-            if (! schema) {
-                ctx.schema[schema_key] = new Object();
-
-                schema = ctx.schema[schema_key];
-                schema.simple = new Object();
-                schema.element = new Object();
-                schema.complex = new Object();
-            }
-
-            cn = schema_node.childNodes;
-            for (j=0, k = cn.length; j<k; ++j) {
-                if (qx.core.Variant.isSet("qx.client", "mshtml")) {
-                    tn = cn[j].baseName;
-                }
-                else {
-                    tn = cn[j].localName;
-                }
-
-                var elt = this.__type_from_node(cn[j], schema_tns);
-                if (tn == "element") {
-                    schema.element[elt.name] = elt
-                }
-                else if (tn == "import") {
-
-                }
-                else if (tn == "simpleType") {
-                    this.__decode_simple_type(cn[j],elt);
-                }
-                else if (tn == "complexType") {
-                    this.__decode_complex_type(cn[j],elt);
-                }
-            }
-        }
-        // fill schema
-        if (schema_node == null) {
-            ctx.schema = null;
-        }
+        this.__decode_schemas(types_node);
     }
 
     ,members: {
@@ -122,6 +74,56 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ,schema : null
         ,definitions : null
 
+        ,__decode_schemas : function(types_node) {
+            var schema_node = null;
+            var ctx = this;
+            for (var i=0, l=types_node.childNodes.length; i<l; ++i) {
+                schema_node = types_node.childNodes[i];
+                var schema_tns = schema_node.getAttribute("targetNamespace");
+                var schema_key = schema_tns;
+
+                qx.log.Logger.debug("        new namespace: '" + schema_tns + "'");
+
+                var schema = ctx.schema[schema_key];
+                if (! schema) {
+                    ctx.schema[schema_key] = new Object();
+
+                    schema = ctx.schema[schema_key];
+                    schema.simple = new Object();
+                    schema.element = new Object();
+                    schema.complex = new Object();
+                }
+
+                var cn = schema_node.childNodes;
+                for (var j=0, k = cn.length; j<k; ++j) {
+                    var tn;
+                    if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                        tn = cn[j].baseName;
+                    }
+                    else {
+                        tn = cn[j].localName;
+                    }
+
+                    var elt = this.__type_from_node(cn[j], schema_tns);
+                    if (tn == "element") {
+                        schema.element[elt.name] = elt
+                    }
+                    else if (tn == "import") {
+
+                    }
+                    else if (tn == "simpleType") {
+                        this.__decode_simple_type(cn[j],elt);
+                    }
+                    else if (tn == "complexType") {
+                        this.__decode_complex_type(cn[j],elt);
+                    }
+                }
+            }
+            // fill schema
+            if (schema_node == null) {
+                ctx.schema = null;
+            }
+        }
         ,__decode_methods : function(port_type_node) {
             var methods = this.methods;
             var cn = port_type_node.childNodes;
@@ -366,6 +368,24 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             return retval;
         }
 
+        ,get_type_defn: function(object_namespace, object_name) {
+            var retval;
+
+            var schema = this.schema[object_namespace];
+            if (schema) {
+                retval = schema.complex[object_name];
+            }
+
+            return retval;
+        }
+
+        ,has_object: function(object_namespace, object_name) {
+            if (this.get_type_defn(object_namespace, object_name)) {
+                return true;
+            }
+            return false;
+        }
+
         ,get_class_map: function(object_namespace, object_name) {
             var ctx=this;
             var retval;
@@ -378,70 +398,66 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                 throw new Error("object_name must be defined!");
             }
 
+            var type = this.get_type_defn(object_namespace, object_name)
+            if (! type) {
+                qx.log.Logger.debug("object not found: {"+object_namespace + "}"
+                                                            + object_name + "");
+
+                return retval;
+            }
+
             qx.log.Logger.debug("creating object: {" + object_namespace + "}"
                                                             + object_name + "");
 
-            var schema = ctx.schema[object_namespace];
-            if (! schema) {
-                qx.log.Logger.debug("'" + object_namespace + "' not found!");
-                return undefined;
+            var children = type.children;
+            var extend = qx.core.Object;
+            if (type.base) {
+                extend = this.get_class(type.base_ns, type.base);
+                qx.log.Logger.debug("base: " + type.base_ns + "." + type.base);
             }
 
-            var type = schema.complex[object_name];
-            if (! type) {
-                qx.log.Logger.debug("'" + object_name + "' not found!");
-            }
-            else {
-                var children = type.children;
-                var extend = qx.core.Object;
-                if (type.base) {
-                    extend = this.get_class(type.base_ns, type.base);
-                    qx.log.Logger.debug("base: " + type.base_ns + "." + type.base);
+            retval = {
+                extend: extend,
+                properties: {},
+                statics: {
+                    TYPE_DEFINITION: type
                 }
+            };
 
-                retval = {
-                    extend: extend,
-                    properties: {},
-                    statics: {
-                        TYPE_DEFINITION: type
+            // get the props
+            var props = retval.properties;
+            for (var k in children) {
+                var child = children[k];
+                var prop_name = "_" + child.name;
+                if ( (! (prop_name in props))
+                                && children.hasOwnProperty(k)
+                                && isNaN(k) ) {
+
+                    var type_l = child.type.split(":")[1];
+
+                    var prop_type;
+                    if (child.is_array) {
+                        prop_type = "Array";
                     }
-                };
-
-                // get the props
-                var props = retval.properties;
-                for (var k in children) {
-                    var child = children[k];
-                    var prop_name = "_" + child.name;
-                    if ( (! (prop_name in props))
-                                    && children.hasOwnProperty(k)
-                                    && isNaN(k) ) {
-
-                        var type_l = child.type.split(":")[1];
-
-                        var prop_type;
-                        if (child.is_array) {
-                            prop_type = "Array";
-                        }
-                        else {
-                            prop_type = soap.Client.TYPE_MAP[type_l];
-                        }
-
-                        if (! prop_type) {
-                            prop_type = this.__get_simple_base(child);
-                        }
-
-                        if (! prop_type) {
-                            prop_type = "Object";
-                        }
-
-                        var prop_def = {"check": prop_type, init: null,
-                                                                 nullable: true}
-
-                        qx.log.Logger.debug(object_name + "." + prop_name
-                                                 + " is a '" + prop_type + "'");
-
-                        props[prop_name] = prop_def;
+                    else {
+                        prop_type = soap.Client.TYPE_MAP[type_l];
                     }
+
+                    if (! prop_type) {
+                        prop_type = this.__get_simple_base(child);
+                    }
+
+                    if (! prop_type) {
+                        prop_type = "Object";
+                    }
+
+                    var prop_def = {"check": prop_type, init: null,
+                                                             nullable: true}
+
+                    qx.log.Logger.debug(object_name + "." + prop_name
+                                             + " is a '" + prop_type + "'");
+
+                    props[prop_name] = prop_def;
                 }
             }
 

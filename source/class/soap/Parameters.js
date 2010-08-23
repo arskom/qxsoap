@@ -227,15 +227,20 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
         ,to_xml : function(doc, parent, cache, method_name) {
             var _ns_soap = "http://schemas.xmlsoap.org/soap/envelope/"
-            //var _ns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
             var _ns_tns = cache.get_target_namespace();
             var sub_element = soap.Client.createSubElementNS;
-
+            var child_defn;
 
             var soap_req_header = this.get_soap_req_header();
             if (soap_req_header != null) {
                 var header = sub_element(doc, parent, "Header", _ns_soap);
-                this.__serialize(doc, header, soap_req_header, cache,
+                var ns = eval(soap_req_header.classname).TYPE_DEFINITION.ns
+
+                child_defn = cache.schema[ns].complex[soap_req_header.basename];
+
+                var object = sub_element(doc, header, soap_req_header.basename, ns);
+
+                this.__serialize(doc, object, soap_req_header, cache,
                                                                     child_defn);
             }
 
@@ -248,8 +253,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                     var child = soap.Client.createSubElementNS(doc, call,
                                             name, cache.get_target_namespace());
 
-                    var child_defn = this.__get_child_defn(parent_defn,
-                                                                   cache, name);
+                    child_defn = this.__get_child_defn(parent_defn, cache, name);
                     /*
                     if (child_defn) {
                         var elts = cache.schema[child_defn.ns].element;
