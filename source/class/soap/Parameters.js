@@ -238,7 +238,8 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
                 child_defn = cache.schema[ns].complex[soap_req_header.basename];
 
-                var object = sub_element(doc, header, soap_req_header.basename, ns);
+                var object = sub_element(doc, header, soap_req_header.basename,
+                                                                            ns);
 
                 this.__serialize(doc, object, soap_req_header, cache,
                                                                     child_defn);
