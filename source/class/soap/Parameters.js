@@ -45,7 +45,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
             for (var i=0, l=value.length; i<l; ++i) {
                 var child = soap.Client.createSubElementNS(doc, parent,
-                                               child_name, parent.namespaceURI);
+                                                     child_name, child_defn.ns);
 
                 this.__serialize(doc, child, value[i], cache, child_defn);
             }
