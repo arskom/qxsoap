@@ -42,10 +42,14 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
         ,__decode_array : function(doc, parent, value, cache, parent_defn) {
             var child_name = parent_defn.children[0].name;
             var child_defn = this.__get_child_defn(parent_defn,cache,0);
-
             for (var i=0, l=value.length; i<l; ++i) {
+                var ns = parent_defn.children[child_name].ns;
+                if (ns == 'http://www.w3.org/2001/XMLSchema') {
+                    ns = cache.get_target_namespace()
+                }
+
                 var child = soap.Client.createSubElementNS(doc, parent,
-                                                     child_name, child_defn.ns);
+                                                                child_name, ns);
 
                 this.__serialize(doc, child, value[i], cache, child_defn);
             }
