@@ -148,7 +148,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             else { // Object or custom function
                 var ctx = this;
 
-                var prop_rec = function (cls) {
+                var prop_rec = function (cls, parent_defn) {
                     if (cls != qx.core.Object) {
                         prop_rec(cls.superclass);
                     }
@@ -156,16 +156,17 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                         return;
                     }
 
-                    var props = qx.util.PropertyUtil.getProperties(cls);
-                    for(var k in props) {
-                        if (props.hasOwnProperty(k)) {
-                            ctx.__decode_object_member(doc, parent, value,
-                                                             cache, parent_defn, k);
-                        }
+                    var i=0;
+                    var cd=parent_defn.children[i];
+                    while (cd) {
+                        ctx.__decode_object_member(doc, parent, value,
+                                            cache, parent_defn, "_" + cd.name);
+
+                        cd=parent_defn.children[++i];
                     }
                 }
 
-                prop_rec(value.constructor);
+                prop_rec(value.constructor, parent_defn);
             }
         }
 
@@ -253,23 +254,25 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             var call = sub_element(doc, body, method_name, _ns_tns);
             var parent_defn = cache.schema[_ns_tns].complex[method_name];
 
-            for(var name in this.__pl) {
-                if (this.__pl.hasOwnProperty(name)) {
-                    var child = soap.Client.createSubElementNS(doc, call,
+            var i=0;
+            var cd=parent_defn.children[i];
+            while (cd) {
+                var name = cd.name;
+                var child = soap.Client.createSubElementNS(doc, call,
                                             name, cache.get_target_namespace());
 
-                    child_defn = this.__get_child_defn(parent_defn, cache, name);
-                    /*
-                    if (child_defn) {
-                        var elts = cache.schema[child_defn.ns].element;
-                        soap.Client.setAttributeNS(doc, child, "xsi:type",
-                            _ns_xsi, elts[child_defn.name].type);
-                    }
-                    */
+                child_defn = this.__get_child_defn(parent_defn, cache, name);
 
-                    this.__serialize(doc, child, this.__pl[name], cache,
-                                                                    child_defn);
+                /*
+                if (child_defn) {
+                    var elts = cache.schema[child_defn.ns].element;
+                    soap.Client.setAttributeNS(doc, child, "xsi:type",
+                        _ns_xsi, elts[child_defn.name].type);
                 }
+                */
+
+                this.__serialize(doc, child, this.__pl[name], cache, child_defn);
+                cd=parent_defn.children[++i];
             }
         }
     }
