@@ -400,20 +400,16 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
             var type = this.get_type_defn(object_namespace, object_name)
             if (! type) {
-                qx.log.Logger.debug("object not found: {"+object_namespace + "}"
+                qx.log.Logger.error("object not found: {"+object_namespace + "}"
                                                             + object_name + "");
 
                 return retval;
             }
 
-            qx.log.Logger.debug("creating object: {" + object_namespace + "}"
-                                                            + object_name + "");
-
             var children = type.children;
             var extend = qx.core.Object;
             if (type.base) {
                 extend = this.get_class(type.base_ns, type.base);
-                qx.log.Logger.debug("base: " + type.base_ns + "." + type.base);
             }
 
             retval = {
@@ -453,9 +449,6 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
                     var prop_def = {"check": prop_type, init: null,
                                                              nullable: true}
-
-                    qx.log.Logger.debug(object_name + "." + prop_name
-                                             + " is a '" + prop_type + "'");
 
                     props[prop_name] = prop_def;
                 }
