@@ -155,12 +155,14 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                     }
 
                     var i=0;
-                    var cd=defn.children[i];
-                    while (cd) {
-                        ctx.__decode_object_member(doc, parent, value,
+                    if (defn.children) {
+                        var cd=defn.children[i];
+                        while (cd) {
+                            ctx.__decode_object_member(doc, parent, value,
                                                     cache, defn, "_" + cd.name);
 
-                        cd=defn.children[++i];
+                            cd=defn.children[++i];
+                        }
                     }
                 }
 
@@ -253,24 +255,26 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             var parent_defn = cache.schema[_ns_tns].complex[method_name];
 
             var i=0;
-            var cd=parent_defn.children[i];
-            while (cd) {
-                var name = cd.name;
-                var child = soap.Client.createSubElementNS(doc, call,
-                                            name, cache.get_target_namespace());
+            if (parent_defn.children) {
+                var cd=parent_defn.children[i];
+                while (cd) {
+                    var name = cd.name;
+                    var child = soap.Client.createSubElementNS(doc, call,
+                                                name, cache.get_target_namespace());
 
-                child_defn = this.__get_child_defn(parent_defn, cache, name);
+                    child_defn = this.__get_child_defn(parent_defn, cache, name);
 
-                /*
-                if (child_defn) {
-                    var elts = cache.schema[child_defn.ns].element;
-                    soap.Client.setAttributeNS(doc, child, "xsi:type",
-                        _ns_xsi, elts[child_defn.name].type);
+                    /*
+                    if (child_defn) {
+                        var elts = cache.schema[child_defn.ns].element;
+                        soap.Client.setAttributeNS(doc, child, "xsi:type",
+                            _ns_xsi, elts[child_defn.name].type);
+                    }
+                    */
+
+                    this.__serialize(doc, child, this.__pl[name], cache, child_defn);
+                    cd=parent_defn.children[++i];
                 }
-                */
-
-                this.__serialize(doc, child, this.__pl[name], cache, child_defn);
-                cd=parent_defn.children[++i];
             }
         }
     }
