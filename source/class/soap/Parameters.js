@@ -148,21 +148,22 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             else { // Object or custom function
                 var ctx = this;
 
-                var prop_rec = function (cls, parent_defn) {
-                    if (cls != qx.core.Object) {
-                        prop_rec(cls.superclass);
+                var prop_rec = function (cls, defn) {
+                    if (defn.base) {
+                        var super_defn = cache.schema[defn.base_ns].complex[defn.base];
+                        prop_rec(cls.superclass, super_defn);
                     }
                     else {
                         return;
                     }
 
                     var i=0;
-                    var cd=parent_defn.children[i];
+                    var cd=defn.children[i];
                     while (cd) {
                         ctx.__decode_object_member(doc, parent, value,
-                                            cache, parent_defn, "_" + cd.name);
+                                                    cache, defn, "_" + cd.name);
 
-                        cd=parent_defn.children[++i];
+                        cd=defn.children[++i];
                     }
                 }
 
