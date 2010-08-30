@@ -153,9 +153,6 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                         var super_defn = cache.schema[defn.base_ns].complex[defn.base];
                         prop_rec(cls.superclass, super_defn);
                     }
-                    else {
-                        return;
-                    }
 
                     var i=0;
                     var cd=defn.children[i];
