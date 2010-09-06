@@ -290,8 +290,9 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
         ,easy: function() {
             var ret = this.__easy.apply(this, arguments);
-
-            this.callAsync(arguments[0], ret[0], false, ret[1], ret[2]);
+            if (ret) {
+                this.callAsync(arguments[0], ret[0], false, ret[1], ret[2]);
+            }
         }
 
         /*
