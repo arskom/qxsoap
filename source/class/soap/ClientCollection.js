@@ -70,7 +70,7 @@ qx.Class.define("soap.ClientCollection", { extend: qx.core.Object
                         try {
                             // this is just to have the wsdl requested, so the
                             // method name does not matter.
-                            client.easy("!_name_!", callback);
+                            client.easy("!_wsdl_!", callback);
                         }
                         catch(e) {
 

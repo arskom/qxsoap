@@ -244,6 +244,10 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 return xhr.send(null);
             }
 
+            if (method_name == '!_wsdl_!') {
+                return;
+            }
+
             var tns = ctx.cache.get_target_namespace();
             var method_input = ctx.cache.schema[tns].complex[method_name];
             if (! method_input) {
