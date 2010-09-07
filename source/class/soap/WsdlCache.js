@@ -305,7 +305,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                 if (! retval) {
                     var tnode = node;
                     while (! retval) {
-                        if (! tnode.getAttribute) {
+                        if (! tnode.parentNode) {
                             return retval;
                         }
 
