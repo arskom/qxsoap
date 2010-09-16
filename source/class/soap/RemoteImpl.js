@@ -100,11 +100,16 @@ qx.Class.define("soap.RemoteImpl", { extend : qx.ui.table.model.Remote
             // issue soap call
             svc.callAsync(this.__data_method_name, args,
                 true, function(r) {
-                    if (ctx.getMapper() != null) {
-                        ctx.getMapper()(r);
-                    }
+                    if (r) {
+                        if (ctx.getMapper() != null) {
+                            ctx.getMapper()(r);
+                        }
 
-                    ctx._onRowDataLoaded(r);
+                        ctx._onRowDataLoaded(r);
+                    }
+                    else {
+                        qx.log.Logger.debug("Row data is empty! r is null!");
+                    }
                     ctx.fireDataEvent("dataLoaded",r);
                 });
         }

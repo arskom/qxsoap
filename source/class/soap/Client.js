@@ -324,15 +324,18 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
         ,__extract_fault : function(method_name, async, simple, req) {
             var retval = null;
-
-            if(req.responseXML.getElementsByTagName("faultcode").length > 0) {
-                var fault_string  = req.responseXML.getElementsByTagName(
-                                      "faultstring")[0].childNodes[0].nodeValue;
-                var node = req.responseXML.getElementsByTagName("detail")[0];
-                fault_string += "\nDetail:\n\n" + node.childNodes[0].nodeValue;
-                retval = new Error(500, fault_string);
-                if (! async) {
-                    throw retval;
+            var get_tag = qx.xml.Element.getElementsByTagNameNS;
+            var tns = this.cache.get_target_namespace();
+            var ret = get_tag(req.responseXML, tns, 'faultcode');
+            if(ret.length > 0) {
+                var fault_string  = get_tag(req.responseXML, tns, 'faultstring')[0].childNodes[0].nodeValue;
+                var detail = get_tag(req.responseXML, tns, 'detail');
+                if (detail.length > 0) {
+                    fault_string += "\nDetail:\n\n" + detail[0].childNodes[0].nodeValue;
+                    retval = new Error(500, fault_string);
+                    if (! async) {
+                        throw retval;
+                    }
                 }
             }
             else {
