@@ -511,6 +511,8 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 }
                 else if (type_local_l == "double" || type_local_l == "float") {
                     retval = (value != null) ? parseFloat(value + "") : 0.0;
+                else if (type_local_l == "decimal") {
+                    retval = Number(value + "");
                 }
                 else if (type_local_l == "datetime") {
                     if (value != null) {
