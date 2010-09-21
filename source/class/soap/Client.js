@@ -499,7 +499,10 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     type_local_l = type_local.toLowerCase();
                 }
 
-                if (type_local_l != "string" && value === "") {
+                if (value === null) {
+                    return retval;
+                }
+                else if (type_local_l != "string" && value === "") {
                     retval = null;
                 }
                 else if (type_local_l == "boolean") {
@@ -507,54 +510,56 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 }
                 else if (type_local_l == "int" || type_local_l == "long"
                             || type_local_l == "integer") {
-                    retval = (value != null) ? parseInt(value + "", 10) : 0;
+                    retval = parseInt(value + "", 10);
                 }
                 else if (type_local_l == "double" || type_local_l == "float") {
-                    retval = (value != null) ? parseFloat(value + "") : 0.0;
+                    retval = parseFloat(value + "");
+                }
                 else if (type_local_l == "decimal") {
                     retval = Number(value + "");
                 }
                 else if (type_local_l == "datetime") {
-                    if (value != null) {
-                        value = value + "";
+                    value = value + "";
 
-                        var ind_dot = value.lastIndexOf(".");
-                        var ind_plus = value.lastIndexOf("+");
+                    var ind_dot = value.lastIndexOf(".");
+                    var ind_plus = value.lastIndexOf("+");
 
-                        var ms = 0;
-                        if (ind_dot != -1) {
-                            var ms_start_ind = ind_dot + 1;
-                            var ms_end_ind = ind_plus;
-                            if (ms_end_ind == -1) {
-                                ms_end_ind = value.length
-                            }
-                            var ms_string = value.substring(ms_start_ind,
-                                                                    ms_end_ind);
-                            ms = parseInt(ms_string.substring(0,3));
+                    var ms = 0;
+                    if (ind_dot != -1) {
+                        var ms_start_ind = ind_dot + 1;
+                        var ms_end_ind = ind_plus;
+                        if (ms_end_ind == -1) {
+                            ms_end_ind = value.length
                         }
-
-                        value = value.substring(0, (
-                            ind_dot == -1 ? (
-                                ind_plus  == -1 ?
-                                value.length :
-                                ind_plus
-                            ) :
-                            ind_dot));
-
-                        value = value.replace(/T/gi," ");
-                        value = value.replace(/-/gi,"/");
-                        var time_ms = Date.parse(value);
-                        time_ms += ms;
-
-                        retval = new Date();
-                        retval.setTime(time_ms);
+                        var ms_string = value.substring(ms_start_ind,
+                                                                ms_end_ind);
+                        ms = parseInt(ms_string.substring(0,3));
                     }
+
+                    value = value.substring(0, (
+                        ind_dot == -1 ? (
+                            ind_plus  == -1 ?
+                            value.length :
+                            ind_plus
+                        ) :
+                        ind_dot));
+
+                    value = value.replace(/T/gi," ");
+                    value = value.replace(/-/gi,"/");
+                    var time_ms = Date.parse(value);
+                    time_ms += ms;
+
+                    retval = new Date();
+                    retval.setTime(time_ms);
                 }
                 else if (type_local_l == "string") {
                     retval = (value != null) ? value + "" : null;
                 }
                 else if (type_local_l == "anytype") {
                     retval = node;
+                }
+                else {
+                    qx.log.Logger.debug("Unrecognized type '" + type_local_l + "' for member '" + type_name + "'");
                 }
             }
             else { // it's a complex type
@@ -567,6 +572,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 if (! defn) {
                     defn = this.cache.schema[type_ns].simple[type_local];
                 }
+
                 // if the definition can't be found, fetch the definition using
                 // the children list in the parent's wsdl declaration.
                 if (! defn) {
