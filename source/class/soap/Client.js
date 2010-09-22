@@ -499,7 +499,10 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     type_local_l = type_local.toLowerCase();
                 }
 
-                if (value === null) {
+                if (type_local_l == "anytype") {
+                    retval = node;
+                }
+                else if (value === null) {
                     return retval;
                 }
                 else if (type_local_l != "string" && value === "") {
@@ -553,10 +556,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     retval.setTime(time_ms);
                 }
                 else if (type_local_l == "string") {
-                    retval = (value != null) ? value + "" : null;
-                }
-                else if (type_local_l == "anytype") {
-                    retval = node;
+                    retval = value + "";
                 }
                 else {
                     qx.log.Logger.debug("Unrecognized type '" + type_local_l + "' for member '" + type_name + "'");
