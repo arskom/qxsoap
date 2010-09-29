@@ -42,7 +42,7 @@ import sys
 from datetime import datetime
 
 from soaplib.serializers.clazz import ClassSerializer
-from soaplib.serializers.primitive import Array
+from soaplib.serializers.clazz import Array
 from soaplib.serializers.primitive import DateTime
 from soaplib.serializers.primitive import Integer
 from soaplib.serializers.primitive import String
