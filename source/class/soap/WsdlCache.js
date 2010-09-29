@@ -35,7 +35,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
     }
 
     ,statics : {
-        nsmap: new Object()
+         nsmap: new Object()
     }
 
     ,construct: function(node) {
@@ -46,6 +46,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ctx.methods = new Object();
         ctx.messages = new Array();
         ctx.schema = new Object();
+
         ctx.__target_namespace = node.documentElement.getAttribute(
                                                              "targetNamespace");
         ctx.prefix_map = new Object();

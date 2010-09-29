@@ -149,71 +149,6 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             return this.cache.get_object(object_namespace, object_name);
         }
 
-        ,get_type_name_from_node : function(node) {
-            var retval = node.getAttribute("type");
-            var s,c,t;
-            var local;
-
-            if (retval == null) {
-                retval = node.getAttribute("xsi:type"); // FIXME: make the prefix dynamic.
-            }
-            if (retval == null) {
-                retval = node.nodeName
-
-                if (qx.core.Variant.isSet("qx.client", "mshtml")) {
-                    local = node.baseName;
-                }
-                else {
-                    local = node.localName;
-                }
-
-                var ns = node.namespaceURI;
-
-                s = this.cache.schema[ns];
-                if (s) {
-                    c=s.complex[retval.split(":")[1]];
-                    if (! c) {
-                        retval = null;
-                    }
-                }
-                else {
-                    retval = null;
-                }
-            }
-
-            if (retval == null) {
-                var parent_type_name = this.get_type_name_from_node(
-                                                               node.parentNode);
-                var parent_ns = node.parentNode.namespaceURI;
-                var parent_local = parent_type_name.split(":")[1];
-
-                s = this.cache.schema[parent_ns];
-                if (s) {
-                    c = s.complex[parent_local];
-                    if (c) {
-                        t = c.children[local];
-                        if (t) {
-                            retval = t.type
-                        }
-                        else while(c.base) {
-                            c = this.cache.schema[c.base_ns].complex[c.base];
-                            if (c) {
-                                t = c.children[local];
-                                if (t) {
-                                    retval = t.type;
-                                }
-                            }
-                            else {
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return retval;
-        }
-
         ,__easy : function (method_name) {
             if (! method_name) {
                 throw new Error("method_name must be defined!");
@@ -389,7 +324,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
                         if (qx.core.Variant.isSet("qx.debug", "on")) {
                             msg += retval.fileName + ":" + retval.lineNumber + "\n\n"
-                                    + retval.stack;
+                                    //+ retval.stack;
                         }
 
                         alert(msg);
@@ -409,7 +344,16 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             var retval = null;
             var k;
 
-            retval = this.__extract(node, simple);
+            var local;
+            if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                local = node.baseName;
+            }
+            else {
+                local = node.localName;
+            }
+
+            var defn = this.cache.schema[node.namespaceURI].complex[local]
+            retval = this.__extract(node, simple, defn);
 
             // one-level-deeper-than-expected hack
             if (simple) {
@@ -432,22 +376,6 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             return retval;
         }
 
-        ,__get_ns_from_node : function(node) {
-            var retval;
-            var type_qname = this.get_type_name_from_node(node)
-            retval = this.cache.type_qname_to_ns(node, type_qname);
-
-            if (retval == null) {
-                retval = node.namespaceURI;
-            }
-
-            if (retval == null) {
-                retval = this.cache.get_target_namespace();
-            }
-
-            return retval;
-        }
-
         ,__is_simple_type : function(type_ns, type_local) {
             var _ns_xsd = "http://www.w3.org/2001/XMLSchema";
             var retval = (type_ns == _ns_xsd);
@@ -462,7 +390,20 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             return retval;
         }
 
-        ,__extract : function(node, simple, parent_defn) {
+        ,__get_child_defn: function(defn, child_name) {
+            var child_ns = defn.children[child_name].ns
+            var child_type = defn.children[child_name].type
+            var child_type_local = child_type.split(':')[1]
+
+            var retval = this.cache.schema[child_ns];
+            if (retval) {
+                 retval = retval.complex[child_type_local] ||
+                                            retval.simple[child_type_local];
+            }
+            return retval;
+        }
+
+        ,__extract : function(node, simple, defn, type_name, type_ns) {
             var retval = null;
 
             var is_null = node.getAttribute("xsi:nil");
@@ -470,17 +411,24 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 return null;
             }
 
-            var type_name = this.get_type_name_from_node(node);
-            var type_ns = this.__get_ns_from_node(node);
+            if (! type_name) {
+                type_name = defn.type;
+                if (type_name) {
+                    type_name = type_name.split(':')[1];
+                }
+                else {
+                    type_name = defn.name;
+                }
+                type_ns = defn.ns;
+            }
+            var type_name_l = type_name.toLowerCase();
 
-            var type_local = type_name.split(":")[1];
-            var type_local_l = type_local.toLowerCase();
 
-            if (type_local_l != "string" && value == "") {
+            if (type_name_l != "string" && value == "") {
                 return null;
             }
 
-            var ret = this.__is_simple_type(type_ns, type_local)
+            var ret = this.__is_simple_type(type_ns, type_name)
             if (ret) {
                 var value = node.nodeValue;
                 if (value == null) {
@@ -495,33 +443,33 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
                 if (ret !== true) {
                     type_name = ret.base; // FIXME: not recursive
-                    type_local = type_name.split(":")[1];
-                    type_local_l = type_local.toLowerCase();
+                    type_name = type_name.split(":")[1];
+                    type_name_l = type_name.toLowerCase();
                 }
 
-                if (type_local_l == "anytype") {
+                if (type_name_l == "anytype") {
                     retval = node;
                 }
                 else if (value === null) {
                     return retval;
                 }
-                else if (type_local_l != "string" && value === "") {
+                else if (type_name_l != "string" && value === "") {
                     retval = null;
                 }
-                else if (type_local_l == "boolean") {
+                else if (type_name_l == "boolean") {
                     retval = value + "" == "true";
                 }
-                else if (type_local_l == "int" || type_local_l == "long"
-                            || type_local_l == "integer") {
+                else if (type_name_l == "int" || type_name_l == "long"
+                            || type_name_l == "integer") {
                     retval = parseInt(value + "", 10);
                 }
-                else if (type_local_l == "double" || type_local_l == "float") {
+                else if (type_name_l == "double" || type_name_l == "float") {
                     retval = parseFloat(value + "");
                 }
-                else if (type_local_l == "decimal") {
+                else if (type_name_l == "decimal") {
                     retval = Number(value + "");
                 }
-                else if (type_local_l == "datetime") {
+                else if (type_name_l == "datetime") {
                     value = value + "";
 
                     var ind_dot = value.lastIndexOf(".");
@@ -555,69 +503,26 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     retval = new Date();
                     retval.setTime(time_ms);
                 }
-                else if (type_local_l == "string") {
+                else if (type_name_l == "string") {
                     retval = value + "";
                 }
                 else {
-                    qx.log.Logger.debug("Unrecognized type '" + type_local_l + "' for member '" + type_name + "'");
+                    qx.log.Logger.debug("Unrecognized type '" + type_name_l + "' for member '" + type_name + "'");
                 }
             }
             else { // it's a complex type
                 var i,l;
 
-                // fetch the type definition from the wsdl using info in the
-                // soap request.
-                var defn = this.cache.schema[type_ns].complex[type_local];
-
-                if (! defn) {
-                    defn = this.cache.schema[type_ns].simple[type_local];
-                }
-
-                // if the definition can't be found, fetch the definition using
-                // the children list in the parent's wsdl declaration.
-                if (! defn) {
-                    if (! parent_defn) {
-                        var parent_type_name = this.get_type_name_from_node(
-                                                               node.parentNode);
-                        var parent_ns = this.__get_ns_from_node(node.parentNode);
-                        var parent_local = parent_type_name.split(":")[1];
-
-                        var parent_schema = this.cache.schema[parent_ns]
-                        parent_defn = parent_schema.complex[parent_local];
-                    }
-
-                    var pd = parent_defn;
-                    var simple_def = pd.children[type_local];
-                    while ( (! simple_def) && pd && pd.base) {
-                        var b_schema = this.cache.schema[pd.base_ns];
-                        if (b_schema) {
-                            var td = b_schema.complex[pd.base]
-                            if (td) {
-                                simple_def = td.children[type_local];
-                                pd = td.base;
-                            }
-                            else {
-                                break;
-                                }
-                        }
-                        else {
-                            break;
-                        }
-                    }
-
-                    type_name = simple_def.type;
-                    type_ns = this.cache.type_qname_to_ns(node, type_name)
-                    type_local = type_name.split(":")[1];
-
-                    defn = this.cache.schema[type_ns].complex[type_local];
-                }
-
                 if (defn.is_array) {
                     retval = new Array();
 
+                    var child_defn = this.__get_child_defn(defn, 0);
                     for (i=0, l=node.childNodes.length; i<l; i++) {
-                        retval.push(this.__extract(node.childNodes[i],simple,
-                                                                         defn));
+                        val = this.__extract(node.childNodes[i],simple,
+                                        child_defn,
+                                        defn.children[0].type.split(":")[1],
+                                        defn.children[0].ns);
+                        retval.push(val);
                     }
                 }
                 else {
@@ -625,7 +530,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                         retval = new Object();
                     }
                     else {
-                        retval = this.get_object(type_ns, type_local);
+                        retval = this.get_object(type_ns, type_name);
                     }
 
                     for (i=0,l=node.childNodes.length; i<l; ++i) {
@@ -645,7 +550,10 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                             val = null;
                         }
                         else {
-                            val = this.__extract(n, simple, defn);
+                            child_defn = this.__get_child_defn(defn, nn);
+                            val = this.__extract(n, simple, child_defn,
+                                        defn.children[nn].type.split(":")[1],
+                                        defn.children[nn].ns);
                         }
 
                         if (simple) {
