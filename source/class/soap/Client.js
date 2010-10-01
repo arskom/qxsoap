@@ -47,6 +47,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             ,"string" : "String"
             ,"anytype": "Document"
         }
+        ,NS_SOAP_ENV: "http://schemas.xmlsoap.org/soap/envelope/"
 
         // http://msmvps.com/blogs/martin_honnen/archive/2009/04/15/creating-xml-with-namespaces-with-javascript-and-msxml.aspx
         ,setAttributeNS: function(doc, node, name, ns, value) {
@@ -259,18 +260,18 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
         ,__extract_fault : function(method_name, async, simple, req) {
             var retval = null;
-            var get_tag = qx.xml.Element.getElementsByTagNameNS;
-            var tns = this.cache.get_target_namespace();
-            var ret = get_tag(req.responseXML, tns, 'faultcode');
+            var ret = req.responseXML.getElementsByTagName('faultcode');
+
             if(ret.length > 0) {
-                var fault_string  = get_tag(req.responseXML, tns, 'faultstring')[0].childNodes[0].nodeValue;
-                var detail = get_tag(req.responseXML, tns, 'detail');
+                var fault_string  = req.responseXML.getElementsByTagName(
+                                      'faultstring')[0].childNodes[0].nodeValue;
+                var detail = req.responseXML.getElementsByTagName('detail');
                 if (detail.length > 0) {
                     fault_string += "\nDetail:\n\n" + detail[0].childNodes[0].nodeValue;
-                    retval = new Error(500, fault_string);
-                    if (! async) {
-                        throw retval;
-                    }
+                }
+                retval = new Error(500, fault_string);
+                if (! async) {
+                    throw retval;
                 }
             }
             else {
@@ -291,22 +292,28 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             }
             else {
                 // get the response type for the method named method_name
-                var tag_name = this.cache.methods[method_name].output.name
+                var output = this.cache.methods[method_name].output
+                var tag_name = output.name
+                var tag_ns =output.ns
 
                 if(tag_name == null) {
                     retval = this.__extract_fault(method_name,async,simple,req);
                 }
                 else {
-                    var nd = req.responseXML.getElementsByTagName(tag_name);
-                    if (nd == null || nd.length == 0) {
-                        var tns = this.cache.get_target_namespace();
-                        nd = qx.xml.Element.getElementsByTagNameNS(
-                                                req.responseXML, tns, tag_name);
-                    }
+                    var nd = qx.xml.Element.getElementsByTagNameNS(
+                                            req.responseXML, tag_ns, tag_name);
 
                     if(nd == null || nd.length == 0) {
-                        retval = this.__extract_fault(method_name, async,
+                        nd = qx.xml.Element.getElementsByTagNameNS(
+                            req.responseXML, soap.Client.NS_SOAP_ENV, "Fault");
+
+                        if(nd == null || nd.length == 0) {
+                            retval = this.__extract_fault(method_name, async,
                                                                    simple, req);
+                        }
+                        else {
+                            retval = Error("Invalid input!")
+                        }
                     }
                     else {
                         retval = this.__to_object(nd[0], simple);
@@ -324,7 +331,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
                         if (qx.core.Variant.isSet("qx.debug", "on")) {
                             msg += retval.fileName + ":" + retval.lineNumber + "\n\n"
-                                    //+ retval.stack;
+                                    + retval.stack;
                         }
 
                         alert(msg);
@@ -642,16 +649,15 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
         ,__send_soap_request : function(method_name, parameters, async, simple,
                                                             callback, errback) {
-            var _ns_soap = "http://schemas.xmlsoap.org/soap/envelope/"
             var _ns_tns = this.cache.get_target_namespace();
 
             var sub_element = soap.Client.createSubElementNS;
             var retval;
 
-
             // build SOAP request
             var doc = qx.xml.Document.create()
-            var envelope = sub_element(doc, doc,"Envelope", _ns_soap);
+            var envelope = sub_element(doc, doc,"Envelope",
+                                                       soap.Client.NS_SOAP_ENV);
             parameters.to_xml(doc, envelope, this.cache, method_name);
 
             // send request
