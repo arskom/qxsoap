@@ -1,4 +1,3 @@
-
 This is an implementation of the SOAP 1.1 protocol with an RPC application in
 mind. It aims to support DOM level-1 compliant browsers.
 
@@ -68,4 +67,4 @@ line to appear. Then navigate to:
          http://localhost:7789/demo/default/source/
 
 and you should see the main screen which is a toolbar with two buttons to the
-upper right.
+upper left.
