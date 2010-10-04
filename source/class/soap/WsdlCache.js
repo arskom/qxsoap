@@ -125,6 +125,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                 ctx.schema = null;
             }
         }
+
         ,__decode_methods : function(port_type_node) {
             var methods = this.methods;
             var cn = port_type_node.childNodes;
@@ -133,6 +134,16 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                 methods[method_name] = new Object();
 
                 var method = methods[method_name];
+                method.input = new Object();
+                method.input.name = null;
+                method.input.message = null;
+                method.input.ns = null;
+
+                method.output = new Object();
+                method.output.name = null;
+                method.output.message = null;
+                method.output.ns = null;
+
                 for (var j=0, k=cn[i].childNodes.length; j<k; ++j) {
                     var method_node = cn[i].childNodes[j];
 
@@ -144,18 +155,12 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                         tn = method_node.localName;
                     }
 
-                    method.input = new Object();
-                    method.input.name = null;
-                    method.input.message = null;
-
-                    method.output = new Object();
-                    method.output.name = null;
-                    method.output.message = null;
-
                     if (tn == "input" || tn == "output") {
                         method[tn] = new Object();
                         method[tn].name = method_node.getAttribute("name");
                         method[tn].message = method_node.getAttribute("message");
+                        method[tn].ns = this.type_qname_to_ns(method_node,
+                                                            method[tn].message);
                     }
                 }
             }
