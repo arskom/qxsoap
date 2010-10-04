@@ -265,10 +265,6 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             if(ret.length > 0) {
                 var fault_string  = req.responseXML.getElementsByTagName(
                                       'faultstring')[0].childNodes[0].nodeValue;
-                var detail = req.responseXML.getElementsByTagName('detail');
-                if (detail.length > 0) {
-                    fault_string += "\nDetail:\n\n" + detail[0].childNodes[0].nodeValue;
-                }
                 retval = new Error(500, fault_string);
                 if (! async) {
                     throw retval;
@@ -307,7 +303,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                         nd = qx.xml.Element.getElementsByTagNameNS(
                             req.responseXML, soap.Client.NS_SOAP_ENV, "Fault");
 
-                        if(nd == null || nd.length == 0) {
+                        if(! (nd == null || nd.length == 0)) {
                             retval = this.__extract_fault(method_name, async,
                                                                    simple, req);
                         }
