@@ -42,6 +42,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
             ,"double": "Number"
             ,"float": "Number"
+            ,"decimal": "Number"
 
             ,"datetime": "Date"
             ,"string" : "String"
