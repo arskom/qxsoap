@@ -40,27 +40,40 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
         __pl : null
 
         ,__decode_array : function(doc, parent, value, cache, parent_defn) {
-            var child_name = parent_defn.children[0].name;
-            var child_defn = this.__get_child_defn(parent_defn,cache,0);
-            for (var i=0, l=value.length; i<l; ++i) {
-                var ns = parent_defn.children[child_name].ns;
-                if (ns == 'http://www.w3.org/2001/XMLSchema') {
-                    ns = cache.get_target_namespace()
+            var i,l;
+            var child;
+
+            if (parent_defn.is_simple_array) {
+                child_name = parent_defn.name;
+                child_defn = this.__get_child_defn(null, cache, 0, parent_defn)
+                for (i=0, l=value.length; i<l; ++i) {
+                    this.__serialize(doc, parent, value[i], cache, child_defn);
                 }
+            }
+            else {
+                var child_name = parent_defn.children[0].name;
+                var child_defn = this.__get_child_defn(parent_defn, cache, 0);
 
-                var child = soap.Client.createSubElementNS(doc, parent,
-                                                                child_name, ns);
-
-                this.__serialize(doc, child, value[i], cache, child_defn);
+                for (i=0, l=value.length; i<l; ++i) {
+                    var ns = parent_defn.children[child_name].ns;
+                    if (ns == 'http://www.w3.org/2001/XMLSchema') {
+                        ns = cache.get_target_namespace()
+                    }
+                    child = soap.Client.createSubElementNS(doc, parent,
+                                                                child_name, ns)
+                    this.__serialize(doc, child, value[i], cache, child_defn);
+                }
             }
         }
 
-        ,__get_child_defn: function(parent_defn, cache, child_name) {
-            var child_defn = parent_defn.children[child_name]
-            var defn = parent_defn;
-            while ( defn.base && (! child_defn)) {
-                defn = cache.schema[defn.base_ns].complex[defn.base];
-                child_defn = defn.children[child_name];
+        ,__get_child_defn: function(parent_defn, cache, child_name, child_defn) {
+            if (! child_defn) {
+                child_defn = parent_defn.children[child_name]
+                var defn = parent_defn;
+                while ( defn.base && (! child_defn)) {
+                    defn = cache.schema[defn.base_ns].complex[defn.base];
+                    child_defn = defn.children[child_name];
+                }
             }
 
             var type_name = child_defn.type
@@ -194,9 +207,13 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             var key = name.slice(1);
             var data = value[getter]();
 
-            var child_defn;
-            var td = eval(value.classname).TYPE_DEFINITION, ns;
-            if (td) {
+            var td = eval(value.classname).TYPE_DEFINITION;
+            var ns;
+            var child_defn = parent_defn.children[key]
+            if (child_defn.is_simple_array) {
+                ns = td.ns;
+            }
+            else if (td) {
                 ns = td.ns;
                 child_defn = this.__get_child_defn(parent_defn, cache, key);
             }

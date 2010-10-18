@@ -297,7 +297,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
             var max_occurs = node.getAttribute("maxOccurs");
             if (max_occurs == "unbounded" || parseInt(max_occurs) > 1) {
-                elt.is_array = true;
+                elt.is_simple_array = true;
             }
 
             return elt;
@@ -443,7 +443,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     var type_l = child.type.split(":")[1];
 
                     var prop_type;
-                    if (child.is_array) {
+                    if (child.is_array || child.is_simple_array) {
                         prop_type = "Array";
                     }
                     else {
