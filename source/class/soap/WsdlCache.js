@@ -295,6 +295,11 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
             elt.base = null;
 
+            var max_occurs = node.getAttribute("maxOccurs");
+            if (max_occurs == "unbounded" || parseInt(max_occurs) > 1) {
+                elt.is_array = true;
+            }
+
             return elt;
         }
 
