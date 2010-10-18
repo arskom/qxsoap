@@ -206,14 +206,6 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
             var child = soap.Client.createSubElementNS(doc, parent, key, ns);
 
-            /*
-            if (child_defn) {
-                var _ns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
-                soap.Client.setAttributeNS(doc, child, "xsi:type", _ns_xsi,
-                    cache.schema[child_defn.ns].element[child_defn.name].type);
-            }
-            */
-
             this.__serialize(doc, child, data, cache, child_defn);
         }
 
@@ -264,13 +256,6 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
                     child_defn = this.__get_child_defn(parent_defn, cache, name);
 
-                    /*
-                    if (child_defn) {
-                        var elts = cache.schema[child_defn.ns].element;
-                        soap.Client.setAttributeNS(doc, child, "xsi:type",
-                            _ns_xsi, elts[child_defn.name].type);
-                    }
-                    */
 
                     this.__serialize(doc, child, this.__pl[name], cache, child_defn);
                     cd=parent_defn.children[++i];
