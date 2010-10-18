@@ -41,15 +41,16 @@ import sys
 
 from datetime import datetime
 
-from soaplib.serializers.clazz import ClassSerializer
-from soaplib.serializers.clazz import Array
-from soaplib.serializers.primitive import DateTime
-from soaplib.serializers.primitive import Integer
-from soaplib.serializers.primitive import String
+from soaplib import Application
+from soaplib.type.clazz import ClassSerializer
+from soaplib.type.clazz import Array
+from soaplib.type.primitive import DateTime
+from soaplib.type.primitive import Integer
+from soaplib.type.primitive import String
 from soaplib.service import rpc
-from soaplib.wsgi import Application
+from soaplib.server import wsgi
 from soaplib.service import DefinitionBase
-from soaplib.util.server import run_twisted
+from soaplib.util.wsgi_wrapper import run_twisted
 
 class SOAPRequest(ClassSerializer):
     startrow = Integer
