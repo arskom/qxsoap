@@ -256,8 +256,8 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
                     child_defn = this.__get_child_defn(parent_defn, cache, name);
 
-
-                    this.__serialize(doc, child, this.__pl[name], cache, child_defn);
+                    this.__serialize(doc, child, this.__pl[name], cache,
+                                                                    child_defn);
                     cd=parent_defn.children[++i];
                 }
             }
