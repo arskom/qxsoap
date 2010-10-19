@@ -66,7 +66,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             }
         }
 
-        ,__get_child_defn: function(parent_defn, cache, child_name, child_defn) {
+        ,__get_child_defn: function(parent_defn, cache, child_name, child_defn){
             if (! child_defn) {
                 child_defn = parent_defn.children[child_name]
                 var defn = parent_defn;
@@ -149,7 +149,8 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                     var cloned_node = value;
                     if (value.ownerDocument) {
                         if (value.ownerDocument.importNode) {
-                            cloned_node = parent.ownerDocument.importNode(value,true);
+                            cloned_node = parent.ownerDocument.importNode(value,
+                                                                          true);
                         }
                         else {
                             cloned_node = parent.ownerDocument.cloneNode(true);
@@ -163,7 +164,8 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
                 var prop_rec = function (cls, defn) {
                     if (defn.base) {
-                        var super_defn = cache.schema[defn.base_ns].complex[defn.base];
+                        var super_schema = cache.schema[defn.base_ns];
+                        var super_defn = super_schema.complex[defn.base];
                         prop_rec(cls.superclass, super_defn);
                     }
 
@@ -269,9 +271,9 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 while (cd) {
                     var name = cd.name;
                     var child = soap.Client.createSubElementNS(doc, call,
-                                                name, cache.get_target_namespace());
+                                            name, cache.get_target_namespace());
 
-                    child_defn = this.__get_child_defn(parent_defn, cache, name);
+                    child_defn= this.__get_child_defn(parent_defn, cache, name);
 
                     this.__serialize(doc, child, this.__pl[name], cache,
                                                                     child_defn);
