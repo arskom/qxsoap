@@ -39,15 +39,17 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
     ,members : {
         __pl : null
 
-        ,__decode_array : function(doc, parent, value, cache, parent_defn) {
+        ,__decode_array : function(doc, parent, value, cache, parent_defn, parent_ns) {
             var i,l;
             var child;
 
             if (parent_defn.is_simple_array) {
                 child_name = parent_defn.name;
+
                 child_defn = this.__get_child_defn(null, cache, 0, parent_defn)
                 for (i=0, l=value.length; i<l; ++i) {
-                    this.__serialize(doc, parent, value[i], cache, child_defn);
+                    child = soap.Client.createSubElementNS(doc, parent, child_name, parent_ns);
+                    this.__serialize(doc, child, value[i], cache, child_defn);
                 }
             }
             else {
@@ -57,7 +59,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 for (i=0, l=value.length; i<l; ++i) {
                     var ns = parent_defn.children[child_name].ns;
                     if (ns == 'http://www.w3.org/2001/XMLSchema') {
-                        ns = cache.get_target_namespace()
+                        ns = cache.get_target_namespace();
                     }
                     child = soap.Client.createSubElementNS(doc, parent,
                                                                 child_name, ns)
@@ -88,14 +90,14 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             return retval;
         }
 
-        ,__decode_object: function(doc, parent, value, cache, parent_defn) {
+        ,__decode_object: function(doc, parent, value, cache, parent_defn, parent_ns) {
             if (value instanceof qx.locale.LocalizedString) {
                 parent.appendChild(doc.createTextNode(value.toString()));
             }
             else if (value instanceof Date) {
                 var year = value.getFullYear().toString();
-                var month = (value.getMonth() + 1).toString();
 
+                var month = (value.getMonth() + 1).toString();
                 month = (month.length == 1) ? "0" + month : month;
 
                 var date = value.getDate().toString();
@@ -139,7 +141,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 parent.appendChild(doc.createTextNode(value.toString()));
             }
             else if(value instanceof Array) {
-                this.__decode_array(doc, parent, value, cache, parent_defn);
+                this.__decode_array(doc, parent, value, cache, parent_defn, parent_ns);
             }
             else if (qx.xml.Document.isXmlDocument(value)) {
                 try {
@@ -174,7 +176,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                         var cd=defn.children[i];
                         while (cd) {
                             ctx.__decode_object_member(doc, parent, value,
-                                                    cache, defn, "_" + cd.name);
+                                        cache, defn, "_" + cd.name, parent_ns);
 
                             cd=defn.children[++i];
                         }
@@ -185,7 +187,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             }
         }
 
-        ,__serialize : function(doc, parent, value, cache, parent_defn) {
+        ,__serialize : function(doc, parent, value, cache, parent_defn, parent_ns) {
             var t = typeof(value);
             var _ns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
@@ -199,12 +201,12 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 parent.appendChild(doc.createTextNode(value.toString()));
             }
             else if (t == "object") {
-                this.__decode_object(doc, parent, value, cache, parent_defn);
+                this.__decode_object(doc, parent, value, cache, parent_defn, parent_ns);
             }
         }
 
         ,__decode_object_member: function(doc, parent, value, cache,
-                                                            parent_defn, name) {
+                                                parent_defn, name, parent_ns) {
             var getter = "get" + name;
             var key = name.slice(1);
             var data = value[getter]();
@@ -212,20 +214,22 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             var td = eval(value.classname).TYPE_DEFINITION;
             var ns;
             var child_defn = parent_defn.children[key]
+            var child;
             if (child_defn.is_simple_array) {
                 ns = td.ns;
+                child = parent
             }
             else if (td) {
                 ns = td.ns;
                 child_defn = this.__get_child_defn(parent_defn, cache, key);
+                child = soap.Client.createSubElementNS(doc, parent, key, ns);
             }
             else {
                 ns = "qxsoap.internal";
+                child = soap.Client.createSubElementNS(doc, parent, key, ns);
             }
 
-            var child = soap.Client.createSubElementNS(doc, parent, key, ns);
-
-            this.__serialize(doc, child, data, cache, child_defn);
+            this.__serialize(doc, child, data, cache, child_defn, ns);
         }
 
         ,add : function(name, value) {
