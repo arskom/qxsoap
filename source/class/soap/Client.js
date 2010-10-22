@@ -172,7 +172,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                             return;
                         }
                         else {
-                            ctx.cache = new soap.WsdlCache(wsdl);
+                            ctx.cache = new soap.WsdlCache(wsdl, ctx);
                             ctx.easy.apply(ctx,ctx_args);
                         }
                     }

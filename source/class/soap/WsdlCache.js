@@ -38,11 +38,12 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
          nsmap: new Object()
     }
 
-    ,construct: function(node) {
+    ,construct: function(node, client) {
         var ctx = this;
         var get_elts = qx.xml.Element.getElementsByTagNameNS;
         var _ns_wsdl = "http://schemas.xmlsoap.org/wsdl/";
 
+        ctx.set_client(client);
         ctx.methods = new Object();
         ctx.messages = new Array();
         ctx.schema = new Object();
@@ -129,25 +130,16 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         ,__decode_methods : function(port_type_node) {
             var methods = this.methods;
             var cn = port_type_node.childNodes;
+
             for (var i=0, l=cn.length; i<l; ++i) {
                 var method_name = cn[i].getAttribute("name");
-                methods[method_name] = new Object();
-
-                var method = methods[method_name];
-                method.input = new Object();
-                method.input.name = null;
-                method.input.message = null;
-                method.input.ns = null;
-
-                method.output = new Object();
-                method.output.name = null;
-                method.output.message = null;
-                method.output.ns = null;
+                var method = methods[method_name] = new soap.Operation(
+                                                            this.get_client());
 
                 for (var j=0, k=cn[i].childNodes.length; j<k; ++j) {
                     var method_node = cn[i].childNodes[j];
 
-                    var tn
+                    var tn;
                     if (qx.core.Variant.isSet("qx.client", "mshtml")) {
                         tn = method_node.baseName;
                     }
