@@ -1,7 +1,7 @@
 This is an implementation of the SOAP 1.1 protocol with an RPC application in
 mind. It aims to support DOM level-1 compliant browsers.
 
-Tested with Twisted 8.2 and soaplib from http://github.com/arskom/soaplib
+Tested with Twisted 8.2 and rpclib-1.1.1-alpha from http://github.com/arskom/rpclib
 on Python 2.6.2, and with Qooxdoo 1.1.
 
 Using `qxsoap` in your application
