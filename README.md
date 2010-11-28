@@ -47,13 +47,13 @@ loader script.
 Preparing the server
 --------------------
 
-Install the latest soaplib and twisted from pypi. As a priviledged user, you can 
+Install the latest rpclib and twisted from pypi. As a privileged user, you can 
 execute the following command:
 
-    easy_install soaplib
+    easy_install rpclib
     easy_install twisted
 
-Once soaplib and twisted are installed, you can run the demo server using the
+Once rpclib and twisted are installed, you can run the demo server using the
 following command:
 
     ./demo_server.py
