@@ -324,11 +324,11 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     else {
                         var msg = this.tr("A '") + retval.name +
                             this.tr("' has occurred!") + "\n" +
-                            retval.message + "\n";
+                            retval.message + "\n" +
+                            retval.fileName + "\n";
 
                         if (qx.core.Variant.isSet("qx.debug", "on")) {
-                            msg += retval.fileName + ":" + retval.lineNumber + "\n\n"
-                                    + retval.stack;
+                            msg += retval.lineNumber + "\n\n" + retval.stack;
                         }
 
                         alert(msg);
