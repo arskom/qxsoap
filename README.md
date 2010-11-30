@@ -1,7 +1,7 @@
 This is an implementation of the SOAP 1.1 protocol with an RPC application in
 mind. It aims to support DOM level-1 compliant browsers.
 
-Tested with Twisted 8.2 and soaplib from http://github.com/arskom/soaplib
+Tested with Twisted 8.2 and rpclib-1.1.1-alpha from http://github.com/arskom/rpclib
 on Python 2.6.2, and with Qooxdoo 1.1.
 
 Using `qxsoap` in your application
@@ -47,13 +47,13 @@ loader script.
 Preparing the server
 --------------------
 
-Install the latest soaplib and twisted from pypi. As a priviledged user, you can 
+Install the latest rpclib and twisted from pypi. As a privileged user, you can 
 execute the following command:
 
-    easy_install soaplib
+    easy_install rpclib
     easy_install twisted
 
-Once soaplib and twisted are installed, you can run the demo server using the
+Once rpclib and twisted are installed, you can run the demo server using the
 following command:
 
     ./demo_server.py
