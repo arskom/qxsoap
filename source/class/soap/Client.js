@@ -52,7 +52,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
         // http://msmvps.com/blogs/martin_honnen/archive/2009/04/15/creating-xml-with-namespaces-with-javascript-and-msxml.aspx
         ,setAttributeNS: function(doc, node, name, ns, value) {
-            if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+            if ((qx.core.Environment.get("engine.name") === "mshtml")) {
                 var attr = doc.createNode(2, name, ns);
                 attr.nodeValue = value;
                 node.setAttributeNode(attr);
@@ -65,7 +65,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
         ,createSubElementNS: function(doc, parent, name, ns) {
             var retval;
 
-            if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+            if ((qx.core.Environment.get("engine.name") === "mshtml")) {
                 retval = doc.createNode(1, name, ns);
             }
             else {
@@ -327,7 +327,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                             retval.message + "\n" +
                             retval.fileName + "\n";
 
-                        if (qx.core.Variant.isSet("qx.debug", "on")) {
+                        if ((qx.core.Environment.get("qx.debug"))) {
                             msg += retval.lineNumber + "\n\n" + retval.stack;
                         }
 
@@ -349,7 +349,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             var k;
 
             var local;
-            if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+            if ((qx.core.Environment.get("engine.name") === "mshtml")) {
                 local = node.baseName;
             }
             else {
@@ -542,7 +542,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                         var n = node.childNodes[i];
                         var nn;
 
-                        if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                        if ((qx.core.Environment.get("engine.name") === "mshtml")) {
                             nn = n.baseName;
                         }
                         else {

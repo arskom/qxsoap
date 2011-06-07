@@ -54,7 +54,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
         qx.log.Logger.debug("New service: " + ctx.__target_namespace);
 
-        if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+        if ((qx.core.Environment.get("engine.name") === "mshtml")) {
             this.definitions = node.childNodes[1];
         }
         else {
@@ -99,7 +99,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                 var cn = schema_node.childNodes;
                 for (var j=0, k = cn.length; j<k; ++j) {
                     var tn;
-                    if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                    if ((qx.core.Environment.get("engine.name") === "mshtml")) {
                         tn = cn[j].baseName;
                     }
                     else {
@@ -140,7 +140,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     var method_node = cn[i].childNodes[j];
 
                     var tn;
-                    if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                    if ((qx.core.Environment.get("engine.name") === "mshtml")) {
                         tn = method_node.baseName;
                     }
                     else {
@@ -201,7 +201,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             }
 
             var tn;
-            if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+            if ((qx.core.Environment.get("engine.name") === "mshtml")) {
                 tn = first_node.baseName;
             }
             else {
@@ -225,7 +225,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             }
 
             var tn;
-            if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+            if ((qx.core.Environment.get("engine.name") === "mshtml")) {
                 tn = first_node.baseName;
             }
             else {
@@ -251,7 +251,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
             for (var n = node.firstChild; n; n=n.nextSibling) {
                 var nn;
-                if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+                if ((qx.core.Environment.get("engine.name") === "mshtml")) {
                     nn = n.baseName;
                 }
                 else {
