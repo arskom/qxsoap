@@ -1,8 +1,7 @@
-#!/usr/bin/python -Ot
+#!/usr/bin/python -Ott
 
 #
-# Copyright (c) 2008-2009, Burak Arslan (burak.arslan-qx@arskom.com.tr)
-# and others.
+# Copyright (c) Burak Arslan <burak.arslan@arskom.com.tr>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -12,7 +11,7 @@
 #     * Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-#     * Neither the name of the Arskom Consultancy Ltd. nor the
+#     * Neither the name of Arskom Consultancy Ltd. or Burak Arslan, nor the
 #       names of its contributors may be used to endorse or promote products
 #       derived from this software without specific prior written permission.
 #
@@ -30,7 +29,7 @@
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger('soaplib.wsgi')
+logger = logging.getLogger('rpclib.wsgi')
 logger.setLevel(logging.DEBUG)
 
 from twisted.python import log
@@ -41,18 +40,22 @@ import sys
 
 from datetime import datetime
 
-from soaplib import Application
-from soaplib.type.clazz import ClassSerializer
-from soaplib.type.clazz import Array
-from soaplib.type.primitive import DateTime
-from soaplib.type.primitive import Integer
-from soaplib.type.primitive import String
-from soaplib.service import rpc
-from soaplib.server import wsgi
-from soaplib.service import DefinitionBase
-from soaplib.util.wsgi_wrapper import run_twisted
+from rpclib.protocol.soap import Soap11
+from rpclib.interface.wsdl import Wsdl11
 
-class SOAPRequest(ClassSerializer):
+from rpclib.server.wsgi import WsgiApplication
+from rpclib.application import Application
+from rpclib.model.complex import ComplexModel
+from rpclib.model.complex import Array
+from rpclib.model.primitive import DateTime
+from rpclib.model.primitive import Integer
+from rpclib.model.primitive import String
+from rpclib.decorator import rpc
+from rpclib.server import wsgi
+from rpclib.service import ServiceBase
+from rpclib.util.wsgi_wrapper import run_twisted
+
+class SOAPRequest(ComplexModel):
     startrow = Integer
     startid = Integer
     sort_by = Integer
@@ -63,14 +66,14 @@ class SOAPRequest(ClassSerializer):
         self.startrow = startrow
         self.endrow = startrow+50
 
-class ReturnObject(ClassSerializer):
+class ReturnObject(ComplexModel):
     byone=Integer
     bytwo=Integer
     bythree=Integer
     byfour=Integer
     byfive=Integer
 
-class NestedObject(ClassSerializer):
+class NestedObject(ComplexModel):
     date_time = DateTime
     ro = ReturnObject
     arr = Array(String)
@@ -79,7 +82,7 @@ class NestedObject(ClassSerializer):
 # Hello World example from http://trac.optio.webfactional.com/wiki/HelloWorld
 #
 
-class HelloWorldService(DefinitionBase):
+class HelloWorldService(ServiceBase):
     max=5000 # adjust to your taste
 
     @rpc(String,Integer,_returns=Array(String))
@@ -135,7 +138,7 @@ class HelloWorldService(DefinitionBase):
 
         return retval
 
-apps = [ (Application([HelloWorldService],'HelloWorldService.HelloWorldService'), 'svc') ]
+apps = [ (WsgiApplication(Application([HelloWorldService], Wsdl11, Soap11, tns='qx.soap.demo')), 'svc') ]
 
 if __name__=='__main__':
     sys.exit(run_twisted(apps, 7789))
