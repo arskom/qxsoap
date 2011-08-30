@@ -32,18 +32,15 @@
 
 qx.Class.define("soap.demo.Application", { extend : qx.application.Standalone
     ,statics : {
-         cliSvc : null
+         client : null
     }
     ,members : {
         main : function() {
             this.base(arguments);
 
-            this.self(arguments).cliSvc = new soap.Client("http://"+document.location.host+"/svc/");
-
-            var ctx=this;
-            this.self(arguments).cliSvc.callAsync("name", new  soap.Parameters(), function(r) {
-//                 alert(r);
-            });
+            var url ="http://" + document.location.host;
+            this.self(arguments).client =new soap.ClientCollection(url);
+            this.self(arguments).client.add_address("app",function(r){ });
 
             var cli_doc = this.getRoot();
             var scr_demo=new soap.demo.scr.Main();

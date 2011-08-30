@@ -13,6 +13,7 @@ nbproject
 /qooxdoo/application
 /qooxdoo/component
 /qooxdoo/framework
+/qooxdoo/documentation
 /qooxdoo/index.html
 /qooxdoo/license.txt
 /qooxdoo/put_qooxdoo_here
@@ -20,4 +21,4 @@ nbproject
 /qooxdoo/tool
 /qooxdoo/version.txt
 
-script/*.js
+demo/default/source/script/*.js

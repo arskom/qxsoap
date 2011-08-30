@@ -491,17 +491,6 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             return retval;
         }
 
-        ,get_table: function(method_name) {
-            // methodun dondurdugu veri tipini alır.
-            var method_input = this.schema.complex[method_name];
-            if (! method_input) {
-                throw new Error("Method named '" + method_name +
-                                                  "' is not exposed via wsdl.");
-            }
-
-            var class_map = {extend: arskom.ui.Table};
-        }
-
         ,get_form: function(object_namespace, object_name) {
             var class_map = this.get_class_map(object_namespace, object_name);
             var props = class_map.properties;

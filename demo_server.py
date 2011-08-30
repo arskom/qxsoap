@@ -29,8 +29,7 @@
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger('rpclib.wsgi')
-logger.setLevel(logging.DEBUG)
+logging.getLogger('rpclib.protocol.soap._base').setLevel(logging.DEBUG)
 
 from twisted.python import log
 observer = log.PythonLoggingObserver('twisted')
@@ -51,20 +50,17 @@ from rpclib.model.primitive import DateTime
 from rpclib.model.primitive import Integer
 from rpclib.model.primitive import String
 from rpclib.decorator import rpc
+from rpclib.decorator import srpc
 from rpclib.server import wsgi
 from rpclib.service import ServiceBase
 from rpclib.util.wsgi_wrapper import run_twisted
 
-class SOAPRequest(ComplexModel):
-    startrow = Integer
-    startid = Integer
-    sort_by = Integer
-    sort_ord = String
-    who = String
+class RequestHeader(ComplexModel):
+    __namespace__ = 'soap'
 
-    def __init__(self, startrow=0):
-        self.startrow = startrow
-        self.endrow = startrow+50
+    row = Integer(ge=0)
+    sort_key = String
+    sort_ord = String
 
 class ReturnObject(ComplexModel):
     byone=Integer
@@ -85,24 +81,20 @@ class NestedObject(ComplexModel):
 class HelloWorldService(ServiceBase):
     max=5000 # adjust to your taste
 
-    @rpc(String,Integer,_returns=Array(String))
-    def say_hello(self,name,times):
+    @srpc(String,Integer,_returns=Array(String))
+    def say_hello(name,times):
         results = []
         for i in range(0,times):
             results.append('Hello, %s'%name)
         return results
 
-    @rpc(SOAPRequest, _returns=Array(ReturnObject))
-    def get_integers(self,req):
-        if req == None:
-            raise Exception('invalid request: request object is null')
-
-        else:
-            if req.startrow < 0:
-                raise Exception('invalid request: startrow < 0')
+    @rpc(_returns=Array(ReturnObject), _in_header=RequestHeader)
+    def get_integers(ctx):
+        if ctx.in_header == None:
+            raise Exception('invalid request: header object is null')
 
         retval=[]
-        for i in range(req.startrow, req.startrow+50):
+        for i in range(ctx.in_header.row, ctx.in_header.row+50):
             retelt=ReturnObject()
             retelt.byone   = i
             retelt.bytwo   = i*2
@@ -114,16 +106,16 @@ class HelloWorldService(ServiceBase):
 
         return retval
 
-    @rpc(SOAPRequest, _returns=Integer)
-    def get_integers_count(self, req):
-        return self.max
+    @srpc(_returns=Integer)
+    def get_integers_count():
+        return HelloWorldService.max
 
-    @rpc(_returns=String)
-    def name (self):
-        return self.__class__.__name__
+    @srpc(_returns=String)
+    def name ():
+        return HelloWorldService.__name__
 
-    @rpc(NestedObject, _returns=NestedObject)
-    def get_nested(self,complex):
+    @srpc(NestedObject, _returns=NestedObject)
+    def get_nested(complex):
         retval = NestedObject()
         retval.date_time = datetime.now()
 
@@ -138,7 +130,15 @@ class HelloWorldService(ServiceBase):
 
         return retval
 
-apps = [ (WsgiApplication(Application([HelloWorldService], Wsdl11, Soap11, tns='qx.soap.demo')), 'svc') ]
+application = Application([HelloWorldService], 'qx.soap.demo',
+        interface=Wsdl11(),
+        in_protocol=Soap11(validator='lxml'),
+        out_protocol=Soap11()
+    )
+
+twisted_apps = [ 
+    (WsgiApplication(application), 'app')
+]
 
 if __name__=='__main__':
-    sys.exit(run_twisted(apps, 7789))
+    sys.exit(run_twisted(twisted_apps, 7789))

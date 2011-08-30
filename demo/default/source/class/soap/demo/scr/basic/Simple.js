@@ -54,17 +54,11 @@ qx.Class.define("soap.demo.scr.basic.Simple", { extend : qx.core.Object
         gbLogin.add(btnSubmitName,{column: 0, row: 3});
 
         btnSubmitName.addListener("execute", function(e) {
-            var params = new soap.Parameters();
-
-            var self = this;
-            self.SoapRunning = soap.demo.Application.cliSvc.callAsync( "name", params, function(r) {
-                self.SoapRunning = null;
-                if (r instanceof Error) {
-                    alert("An error has occured!\r\n\r\n" + r.fileName + " line " + r.lineNumber);
-                }
-                else {
-                    alert(r);
-                }
+            soap.demo.Application.client.c.app.easy("name", function(r) {
+                alert(r)
+            },
+            function(r) {
+                alert("An error has occured!\r\n\r\n" + r.fileName + " line " + r.lineNumber);
             });
         });
 
@@ -74,7 +68,7 @@ qx.Class.define("soap.demo.scr.basic.Simple", { extend : qx.core.Object
             params.add("times", txtTimes.getValue());
 
             var ctx = this;
-            soap.demo.Application.cliSvc.easy("say_hello", txtName.getValue(), txtTimes.getValue(), function(r) {
+            soap.demo.Application.client.c.app.easy("say_hello", txtName.getValue(), txtTimes.getValue(), function(r) {
                 if (r instanceof Error) {
                     alert("An error has occured!\r\n\r\n" + r.fileName + " line " + r.lineNumber);
                 }

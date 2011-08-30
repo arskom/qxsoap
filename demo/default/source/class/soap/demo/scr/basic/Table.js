@@ -34,7 +34,7 @@ qx.Class.define("soap.demo.scr.basic.Table", { extend : qx.core.Object
         this.base(arguments);
 
         var ctx=this;
-        var svc = soap.demo.Application.cliSvc;
+        var svc = soap.demo.Application.client.c.app;
 
         var req = svc.get_object("HelloWorldService.HelloWorldService","SOAPRequest");
 

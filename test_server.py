@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from soaplib.test.interop.server.static import main
+from rpclib.test.interop.server.soap_http_static import main
 
 if __name__ == '__main__':
     import sys

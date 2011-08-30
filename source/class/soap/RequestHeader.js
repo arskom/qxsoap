@@ -5,4 +5,9 @@ qx.Class.define("soap.RequestHeader", { extend: qx.core.Object
         ,_sort_key : {check: "String", nullable: true, init: null}
         ,_sort_ord : {check: "String", nullable: true, init: null}
     }
+    ,statics: {
+        TYPE_DEFINITION: {
+            ns: 'soap'
+        }
+    }
 });
