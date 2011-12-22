@@ -113,6 +113,42 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
             return retval;
         }
+        ,datetime_isoformat : function(value) {
+            value = value + "";
+
+            var ind_dot = value.lastIndexOf(".");
+            var ind_plus = value.lastIndexOf("+");
+
+            var ms = 0;
+            if (ind_dot != -1) {
+                var ms_start_ind = ind_dot + 1;
+                var ms_end_ind = ind_plus;
+                if (ms_end_ind == -1) {
+                    ms_end_ind = value.length
+                }
+                var ms_string = value.substring(ms_start_ind,
+                                                        ms_end_ind);
+                ms = parseInt(ms_string.substring(0,3));
+            }
+
+            value = value.substring(0, (
+                ind_dot == -1 ? (
+                    ind_plus  == -1 ?
+                    value.length :
+                    ind_plus
+                ) :
+                ind_dot));
+
+            value = value.replace(/T/gi," ");
+            value = value.replace(/-/gi,"/");
+            var time_ms = Date.parse(value);
+            time_ms += ms;
+
+            retval = new Date();
+            retval.setTime(time_ms);
+
+            return retval
+        }
     }
     ,construct : function(url, header_class) {
         this.base(arguments);
@@ -474,38 +510,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     retval = Number(value + "");
                 }
                 else if (type_name_l == "datetime") {
-                    value = value + "";
-
-                    var ind_dot = value.lastIndexOf(".");
-                    var ind_plus = value.lastIndexOf("+");
-
-                    var ms = 0;
-                    if (ind_dot != -1) {
-                        var ms_start_ind = ind_dot + 1;
-                        var ms_end_ind = ind_plus;
-                        if (ms_end_ind == -1) {
-                            ms_end_ind = value.length
-                        }
-                        var ms_string = value.substring(ms_start_ind,
-                                                                ms_end_ind);
-                        ms = parseInt(ms_string.substring(0,3));
-                    }
-
-                    value = value.substring(0, (
-                        ind_dot == -1 ? (
-                            ind_plus  == -1 ?
-                            value.length :
-                            ind_plus
-                        ) :
-                        ind_dot));
-
-                    value = value.replace(/T/gi," ");
-                    value = value.replace(/-/gi,"/");
-                    var time_ms = Date.parse(value);
-                    time_ms += ms;
-
-                    retval = new Date();
-                    retval.setTime(time_ms);
+                    retval = soap.Client.datetime_isoformat(value);
                 }
                 else if (type_name_l == "string") {
                     retval = value + "";
