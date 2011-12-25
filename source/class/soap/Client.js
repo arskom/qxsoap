@@ -144,7 +144,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             var time_ms = Date.parse(value);
             time_ms += ms;
 
-            retval = new Date();
+            var retval = new Date();
             retval.setTime(time_ms);
 
             return retval
