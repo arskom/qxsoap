@@ -22,7 +22,7 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SeasyOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
@@ -195,6 +195,24 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             var ctx=this;
             var ctx_args = arguments;
 
+            /* this block completes callback and errback assignments:
+             * if the last argument is a function, it is the callback.
+             * if the last two arguments are functions, the last one is the
+             * errback and the one before that is the callback.
+             */
+            var l = arguments.length;
+            var callback, errback;
+            if (arguments[l-1] instanceof Function) {
+                callback = arguments[l-1];
+                --l;
+
+                if (arguments[l-1] instanceof Function) {
+                    callback = arguments[l-1];
+                    errback = arguments[l];
+                    --l;
+                }
+            }
+
             if(this.cache == null) {
                 var xhr = qx.io.remote.transport.XmlHttp.createRequestObject();
                 xhr.open("GET", this.get_url() + "?wsdl", true);
@@ -205,10 +223,16 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                         if (wsdl == null) {
                             ctx.dispatchEvent(new qx.io.remote.Response(
                                                                 "wsdl_failed"));
+                            if (errback) {
+                                errback
+                            }
                             return;
                         }
                         else {
                             ctx.cache = new soap.WsdlCache(wsdl, ctx);
+                            if (callback) {
+                                callback();
+                            }
                             ctx.easy.apply(ctx,ctx_args);
                         }
                     }
@@ -226,24 +250,6 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             if (! method_input) {
                 throw new Error("Method named '" + method_name +
                                                   "' is not exposed via wsdl.");
-            }
-
-            /* this block completes callback and errback assignments:
-             * if the last argument is a function, it is the callback.
-             * if the last two arguments are functions, the last one is the
-             * errback and the one before that is the callback.
-             */
-            var l = arguments.length;
-            var callback, errback;
-            if (arguments[l-1] instanceof Function) {
-                callback = arguments[l-1];
-                --l;
-
-                if (arguments[l-1] instanceof Function) {
-                    callback = arguments[l-1];
-                    errback = arguments[l];
-                    --l;
-                }
             }
 
             var args = new soap.Parameters();
