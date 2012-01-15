@@ -114,10 +114,10 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
                     }
                     else if (tn == "simpleType") {
-                        this.__decode_simple_type(cn[j],elt);
+                        this.__decode_simple_type(cn[j], elt);
                     }
                     else if (tn == "complexType") {
-                        this.__decode_complex_type(cn[j],elt);
+                        this.__decode_complex_type(cn[j], elt);
                     }
                 }
             }
@@ -247,6 +247,9 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         }
 
         ,__decode_simple_type : function(node, elt) {
+            var tn;
+            var _ns_xsd = "http://www.w3.org/2001/XMLSchema";
+
             this.schema[elt.ns].simple[elt.name] = elt
 
             for (var n = node.firstChild; n; n=n.nextSibling) {
@@ -261,9 +264,33 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                 if (nn == 'restriction') {
                     elt.base = n.getAttribute("base");
                     elt.base_ns = this.type_qname_to_ns(n,elt.base);
+                    elt.type = n.getAttribute("base");
+                    elt.type_ns = this.base_ns;
+                    if (! (elt.type.split(":")[1] in soap.Client.TYPE_MAP)) {
+                        elt.type = this.__get_simple_base(elt)
+                        elt.type_ns = "http://www.w3.org/2001/XMLSchema";
+                    }
                     elt.restrictions = new Object();
+                    elt.restrictions.values = [];
                     for (var r = n.firstChild; r != null; r=r.nextSibling) {
-                        // TODO: fill restrictions
+                        if ((qx.core.Environment.get("engine.name") === "mshtml")) {
+                            tn = r.baseName;
+                        }
+                        else {
+                            tn = r.localName;
+                        }
+
+                        var value = r.getAttribute("value");
+                        if (tn == 'enumeration') {
+                            value = soap.Client.from_string(elt.type, value);
+                            elt.restrictions.values.push(value);
+                        }
+                        else if (tn == 'minLength') {
+                            elt.restrictions.min_length = parseInt(value);
+                        }
+                        else if (tn == 'maxLength') {
+                            elt.restrictions.max_length = parseInt(value);
+                        }
                     }
                 }
             }
@@ -363,8 +390,6 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     else {
                         retval = simple_type.base.split(":")[1];
                     }
-
-                    retval = soap.Client.TYPE_MAP[retval];
                 }
             }
 
@@ -443,7 +468,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     }
 
                     if (! prop_type) {
-                        prop_type = this.__get_simple_base(child);
+                        prop_type = soap.Client.TYPE_MAP[this.__get_simple_base(child)];
                     }
 
                     if (! prop_type) {

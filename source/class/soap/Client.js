@@ -149,6 +149,49 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
             return retval
         }
+
+        ,from_string: function(type_name, value) {
+            var retval;
+            var type_name_l = type_name.toLowerCase();
+            if (type_name_l != "string" && value == "") {
+                return null;
+            }
+
+            if (type_name_l == "anytype") {
+                retval = node;
+            }
+            else if (value === null) {
+                return retval;
+            }
+            else if (type_name_l != "string" && value === "") {
+                retval = null;
+            }
+            else if (type_name_l == "boolean") {
+                retval = value + "" == "true";
+            }
+            else if (type_name_l == "int" || type_name_l == "long"
+                        || type_name_l == "integer") {
+                retval = parseInt(value + "", 10);
+            }
+            else if (type_name_l == "double" || type_name_l == "float") {
+                retval = parseFloat(value + "");
+            }
+            else if (type_name_l == "decimal") {
+                retval = Number(value + "");
+            }
+            else if (type_name_l == "datetime") {
+                retval = soap.Client.datetime_isoformat(value);
+            }
+            else if (type_name_l == "string") {
+                retval = value + "";
+            }
+            else {
+                qx.log.Logger.debug("Unrecognized type '" + type_name_l + "' for member '" + type_name + "'");
+            }
+
+            return retval;
+        }
+
     }
     ,construct : function(url, header_class) {
         this.base(arguments);
@@ -467,12 +510,6 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 }
                 type_ns = defn.ns;
             }
-            var type_name_l = type_name.toLowerCase();
-
-
-            if (type_name_l != "string" && value == "") {
-                return null;
-            }
 
             var ret = this.__is_simple_type(type_ns, type_name)
             if (ret) {
@@ -487,43 +524,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     }
                 }
 
-                if (ret !== true) {
-                    type_name = ret.base; // FIXME: not recursive
-                    type_name = type_name.split(":")[1];
-                    type_name_l = type_name.toLowerCase();
-                }
-
-                if (type_name_l == "anytype") {
-                    retval = node;
-                }
-                else if (value === null) {
-                    return retval;
-                }
-                else if (type_name_l != "string" && value === "") {
-                    retval = null;
-                }
-                else if (type_name_l == "boolean") {
-                    retval = value + "" == "true";
-                }
-                else if (type_name_l == "int" || type_name_l == "long"
-                            || type_name_l == "integer") {
-                    retval = parseInt(value + "", 10);
-                }
-                else if (type_name_l == "double" || type_name_l == "float") {
-                    retval = parseFloat(value + "");
-                }
-                else if (type_name_l == "decimal") {
-                    retval = Number(value + "");
-                }
-                else if (type_name_l == "datetime") {
-                    retval = soap.Client.datetime_isoformat(value);
-                }
-                else if (type_name_l == "string") {
-                    retval = value + "";
-                }
-                else {
-                    qx.log.Logger.debug("Unrecognized type '" + type_name_l + "' for member '" + type_name + "'");
-                }
+                soap.Client.from_string(type_name, value);
             }
             else { // it's a complex type
                 var i,l;
