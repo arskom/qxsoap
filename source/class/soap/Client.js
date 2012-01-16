@@ -43,6 +43,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             ,"double": "Number"
             ,"float": "Number"
             ,"decimal": "Number"
+            ,"unsignedlong": "Number"
 
             ,"datetime": "Date"
             ,"string" : "String"
@@ -153,9 +154,6 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
         ,from_string: function(type_name, value) {
             var retval;
             var type_name_l = type_name.toLowerCase();
-            if (type_name_l != "string" && value == "") {
-                return null;
-            }
 
             if (type_name_l == "anytype") {
                 retval = node;
@@ -169,8 +167,8 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             else if (type_name_l == "boolean") {
                 retval = value + "" == "true";
             }
-            else if (type_name_l == "int" || type_name_l == "long"
-                        || type_name_l == "integer") {
+            else if (type_name_l == "int" || type_name_l == "long" ||
+                     type_name_l == "integer" || type_name_l == "unsignedlong") {
                 retval = parseInt(value + "", 10);
             }
             else if (type_name_l == "double" || type_name_l == "float") {
