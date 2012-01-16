@@ -524,7 +524,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     }
                 }
 
-                soap.Client.from_string(type_name, value);
+                retval = soap.Client.from_string(type_name, value);
             }
             else { // it's a complex type
                 var i,l;
