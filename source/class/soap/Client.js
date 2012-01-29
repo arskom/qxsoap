@@ -155,10 +155,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             var retval;
             var type_name_l = type_name.toLowerCase();
 
-            if (type_name_l == "anytype") {
-                retval = node;
-            }
-            else if (value === null) {
+            if (value === null) {
                 return retval;
             }
             else if (type_name_l != "string" && value === "") {
@@ -522,7 +519,12 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     }
                 }
 
-                retval = soap.Client.from_string(type_name, value);
+                if (type_name == "anyType") {
+                    retval = node;
+                }
+                else {
+                    retval = soap.Client.from_string(type_name, value);
+                }
             }
             else { // it's a complex type
                 var i,l;
