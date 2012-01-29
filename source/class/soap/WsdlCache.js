@@ -282,7 +282,14 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
                         var value = r.getAttribute("value");
                         if (tn == 'enumeration') {
-                            value = soap.Client.from_string(elt.type, value);
+                            if (! elt.type) {
+                                if( window.console && window.console.firebug ) {
+                                    console.log(elt);
+                                }
+                            }
+                            else {
+                                value = soap.Client.from_string(elt.type, value);
+                            }
                             elt.restrictions.values.push(value);
                         }
                         else if (tn == 'minLength') {
