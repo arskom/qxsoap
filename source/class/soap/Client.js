@@ -262,7 +262,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                             ctx.dispatchEvent(new qx.io.remote.Response(
                                                                 "wsdl_failed"));
                             if (errback) {
-                                errback
+                                errback();
                             }
                             return;
                         }
