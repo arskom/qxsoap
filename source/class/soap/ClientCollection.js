@@ -27,6 +27,14 @@
  */
 
 qx.Class.define("soap.ClientCollection", { extend: qx.core.Object
+    ,properties : {
+         _url : {check:"String"}
+        ,_client_class : {check: "Function"}
+        ,_header_class : {check: "Function"}
+    }
+    ,events : {
+        "initialized": "qx.event.type.Data"
+    }
     ,construct: function(url, client_class, header_class) {
         this.c = new Object();
         this.set_url(url);
@@ -44,44 +52,37 @@ qx.Class.define("soap.ClientCollection", { extend: qx.core.Object
         else {
             this.set_header_class(soap.RequestHeader);
         }
+        this.__init = new Object();
 
-    }
-    ,properties : {
-         _url : {check:"String"}
-        ,_client_class : {check: "Function"}
-        ,_header_class : {check: "Function"}
     }
     ,members: {
          c: null
+        ,__init: null
 
         ,add_address: function(address, callback) {
-            var parts = address.split('/');
-            var obj = this.c;
+            var client_url = this.get_url() + "/" + address + "/";
+            var client_class = this.get_client_class();
+            var header_class = this.get_header_class();
 
-            for (var i=0,l=parts.length; i<l; ++i) {
-                var caddr = parts.slice(0,i+1).join("/");
+            this.c[address] = new client_class(client_url, header_class);
+            this.__init[address] = false
+        }
 
-                if (i == l-1) {
-                    var curl = this.get_url() + "/" + caddr + "/";
-                    var c_class = this.get_client_class();
-                    var h_class = this.get_header_class();
-                    var client = new c_class(curl, h_class);
-                    if (callback) {
-                        try {
-                            // this is just to have the wsdl requested, so the
-                            // method name does not matter.
-                            client.easy("!_wsdl_!", callback);
-                        }
-                        catch(e) {
+        ,initialize: function() {
+            var ctx=this;
+            for (var key in ctx.c) (function(k) {
+                ctx.c[k].easy("!_wsdl_!", function(r) {
+                    ctx.__init[k] = true;
 
-                        }
+                    var result = true;
+                    for (var k2 in ctx.__init) {
+                        result = result && ctx.__init[k2];
                     }
-                    obj[parts[i]] = client;
-                }
-                else if (parts[i].length > 0 && (! obj[parts[i]])) {
-                    obj[parts[i]] = new Object();
-                }
-            }
+                    if (result) {
+                        ctx.fireDataEvent("initialized");
+                    }
+                });
+            })(key);
         }
     }
 });
