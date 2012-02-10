@@ -230,7 +230,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 throw new Error("method_name must be defined!");
             }
 
-            var ctx=this;
+            var ctx = this;
             var ctx_args = arguments;
 
             /* this block completes callback and errback assignments:
@@ -271,7 +271,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                             if (callback) {
                                 callback();
                             }
-                            ctx.easy.apply(ctx,ctx_args);
+                            ctx.easy.apply(ctx, ctx_args);
                         }
                     }
                 }
