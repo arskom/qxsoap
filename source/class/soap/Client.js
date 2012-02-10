@@ -181,7 +181,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 retval = value + "";
             }
             else {
-                qx.log.Logger.debug("Unrecognized type '" + type_name_l + "' for member '" + type_name + "'");
+                qx.log.Logger.debug("Unrecognized type '" + type_name + "'");
             }
 
             return retval;
