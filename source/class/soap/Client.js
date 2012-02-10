@@ -316,13 +316,6 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             }
         }
 
-        /*
-        ,easy: function() {
-            this.easy_deferred.apply(this, arguments);
-            this.__queue.flush();
-        }
-        */
-
         ,easy_deferred: function() {
             var ret = this.__easy.apply(this, arguments);
 
