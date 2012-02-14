@@ -339,7 +339,15 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             if(ret.length > 0) {
                 var fault_string  = req.responseXML.getElementsByTagName(
                                       'faultstring')[0].childNodes[0].nodeValue;
-                retval = new Error(500, fault_string);
+                if ((qx.core.Environment.get("engine.name") === "mshtml")) {
+                    retval = new Error(500, fault_string);
+                }
+                else if ((qx.core.Environment.get("engine.name") === "gecko")) {
+                    retval = new Error(500, fault_string);
+                }
+                else {
+                    retval = new Error(fault_string);
+                }
                 if (! async) {
                     throw retval;
                 }
