@@ -114,6 +114,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
             return retval;
         }
+
         ,datetime_isoformat : function(value) {
             value = value + "";
 
@@ -188,6 +189,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
         }
 
     }
+
     ,construct : function(url, header_class) {
         this.base(arguments);
 

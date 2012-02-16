@@ -195,24 +195,66 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
         }
 
         ,__decode_complex_type : function(node, elt) {
-            var first_node = node.firstChild;
-            if (! first_node) {
+            var child = node.firstChild;
+            if (! child) {
                 return;
             }
 
             var tn;
             if ((qx.core.Environment.get("engine.name") === "mshtml")) {
-                tn = first_node.baseName;
+                tn = child.baseName;
             }
             else {
-                tn = first_node.localName;
+                tn = child.localName;
+            }
+
+            if (tn == 'annotation') {
+                for (var n = child.firstChild; n; n=n.nextSibling) {
+                    var ntn;
+                    if ((qx.core.Environment.get("engine.name") === "mshtml")) {
+                        ntn = n.baseName;
+                    }
+                    else {
+                        ntn = n.localName;
+                    }
+                    if (ntn == 'appinfo') {
+                        elt.ann = {};
+                        for (var nn = n.firstChild; nn; nn=nn.nextSibling) {
+                            var nntn;
+                            if ((qx.core.Environment.get("engine.name") === "mshtml")) {
+                                nntn = nn.baseName;
+                            }
+                            else {
+                                nntn = nn.localName;
+                            }
+                            if (nntn == 'source') {
+                                elt.ann.source_ns = nn.getAttribute('ns');
+                                elt.ann.source_name = nn.getAttribute('name');
+                            }
+                        }
+                    }
+                }
+
+                child = child.nextSibling;
+                if (! child) {
+                    return;
+                }
+                if ((qx.core.Environment.get("engine.name") === "mshtml")) {
+                    tn = child.baseName;
+                }
+                else {
+                    tn = child.localName;
+                }
+                if (! child) {
+                    return;
+                }
             }
 
             if (tn == 'sequence') {
-                this.__decode_sequence(first_node, elt);
+                this.__decode_sequence(child, elt);
             }
             if (tn == 'complexContent') {
-                this.__decode_complex_content(first_node, elt);
+                this.__decode_complex_content(child, elt);
             }
 
             this.schema[elt.ns].complex[elt.name] = elt
