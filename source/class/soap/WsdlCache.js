@@ -308,7 +308,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     elt.base_ns = this.type_qname_to_ns(n,elt.base);
                     elt.type = n.getAttribute("base");
                     elt.type_ns = this.base_ns;
-                    if (! (elt.type.split(":")[1] in soap.Client.TYPE_MAP)) {
+                    if (! (elt.type.split(":")[1].toLowerCase() in soap.Client.TYPE_MAP)) {
                         elt.type = this.__get_simple_base(elt)
                         elt.type_ns = "http://www.w3.org/2001/XMLSchema";
                     }
@@ -408,18 +408,18 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
         ,__get_simple_base : function(child) {
             var retval;
-            var type_l = child.type.split(":")[1];
+            var type_name = child.type.split(":")[1];
             var simple_type_ns = this.schema[child.ns]
 
             if (simple_type_ns) {
-                var simple_type = simple_type_ns.simple[type_l];
+                var simple_type = simple_type_ns.simple[type_name];
 
                 if (simple_type) {
                     while (simple_type.base != null) {
                         var base_ns = this.schema[simple_type.base_ns]
                         if (base_ns) {
-                            var base_l = simple_type.base.split(":")[1];
-                            simple_type = base_ns.simple[base_l];
+                            var base_name = simple_type.base.split(":")[1];
+                            simple_type = base_ns.simple[base_name];
 
                             qx.core.Assert.assertNotUndefined(simple_type,
                                     "Simple Type " +
@@ -506,7 +506,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                                 && children.hasOwnProperty(k)
                                 && isNaN(k) ) {
 
-                    var type_l = child.type.split(":")[1];
+                    var type_l = child.type.split(":")[1].toLowerCase();
 
                     var prop_type;
                     if (child.is_array || child.is_simple_array) {
@@ -517,15 +517,17 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     }
 
                     if (! prop_type) {
-                        prop_type = soap.Client.TYPE_MAP[this.__get_simple_base(child)];
+                        type_l = this.__get_simple_base(child);
+                        if (type_l) {
+                            prop_type = soap.Client.TYPE_MAP[type_l.toLowerCase()];
+                        }
                     }
 
                     if (! prop_type) {
                         prop_type = "Object";
                     }
 
-                    var prop_def = {"check": prop_type, init: null,
-                                                             nullable: true}
+                    var prop_def = {"check": prop_type, init: null, nullable: true}
 
                     props[prop_name] = prop_def;
                 }
