@@ -237,10 +237,6 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
         }
 
         ,add : function(name, value) {
-            if (value == null || value + "" == "undefined") {
-                return this;
-            }
-
             this.__pl[name] = value;
             return this;
         }
