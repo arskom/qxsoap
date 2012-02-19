@@ -43,7 +43,9 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
     ,members : {
         __pl : null
-
+        ,get_params: function() {
+            return this.__pl;
+        }
         ,__decode_array : function(doc, parent, value, cache, defn, parent_defn, parent_ns) {
             var i,l;
             var child;
@@ -273,13 +275,25 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 var cd = parent_defn.children[i];
                 while (cd) {
                     var name = cd.name;
-                    var child = soap.Client.createSubElementNS(doc, call,
-                                            name, cache.get_target_namespace());
+                    var ctx = this;
+                    var f = function(val) {
+                        var child = soap.Client.createSubElementNS(doc, call,
+                                                name, cache.get_target_namespace());
 
-                    defn = this.__get_child_defn(parent_defn, cache, name);
+                        defn = ctx.__get_child_defn(parent_defn, cache, name);
 
-                    this.__serialize(doc, child, this.__pl[name], cache, defn,
-                                                                   parent_defn);
+                        ctx.__serialize(doc, child, val, cache, defn,
+                                                                       parent_defn);
+                    }
+                    var value = this.__pl[name];
+                    if (cd.is_simple_array && value) {
+                        for (var j=0, l=value.length; j < l; ++j) {
+                            f(this.__pl[name][j]);
+                        }
+                    }
+                    else {
+                        f(this.__pl[name]);
+                    }
                     cd = parent_defn.children[++i];
                 }
             }
