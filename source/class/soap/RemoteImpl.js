@@ -57,7 +57,12 @@ qx.Class.define("soap.RemoteImpl", { extend : qx.ui.table.model.Remote
         ,__row_data_method_name: null
         ,__count_request_sent: false
         ,__args: null
-
+        ,get_params: function() {
+            return this.__args;
+        }
+        ,set_params: function(val) {
+            this.__args = val;
+        }
         ,_loadRowCount : function() {
             var ctx = this;
             var svc = ctx.__soap_client;
