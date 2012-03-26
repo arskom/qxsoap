@@ -309,7 +309,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     elt.type = n.getAttribute("base");
                     elt.type_ns = this.base_ns;
                     if (! (elt.type.split(":")[1].toLowerCase() in soap.Client.TYPE_MAP)) {
-                        elt.type = this.__get_simple_base(elt)
+                        elt.type = this.get_simple_type_base(elt)
                         elt.type_ns = "http://www.w3.org/2001/XMLSchema";
                     }
                     elt.restrictions = new Object();
@@ -406,7 +406,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             return this.__target_namespace;
         }
 
-        ,__get_simple_base : function(child) {
+        ,get_simple_type_base : function(child) {
             var retval;
             var type_name = child.type.split(":")[1];
             var simple_type_ns = this.schema[child.ns]
@@ -517,7 +517,7 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                     }
 
                     if (! prop_type) {
-                        type_l = this.__get_simple_base(child);
+                        type_l = this.get_simple_type_base(child);
                         if (type_l) {
                             prop_type = soap.Client.TYPE_MAP[type_l.toLowerCase()];
                         }
