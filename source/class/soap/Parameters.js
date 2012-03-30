@@ -41,6 +41,50 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
         _soap_req_header : {init: null, nullable: true}
     }
 
+    ,statics : {
+        date_to_iso: function(value) {
+            var year = value.getFullYear().toString();
+
+            var month = (value.getMonth() + 1).toString();
+            month = (month.length == 1) ? "0" + month : month;
+
+            var date = value.getDate().toString();
+            date = (date.length == 1) ? "0" + date : date;
+
+            var hours = value.getHours().toString();
+            hours = (hours.length == 1) ? "0" + hours : hours;
+
+            var minutes = value.getMinutes().toString();
+            minutes = (minutes.length == 1) ? "0" + minutes : minutes;
+
+            var seconds = value.getSeconds().toString();
+            seconds = (seconds.length == 1) ? "0" + seconds : seconds;
+
+            var miliseconds = value.getMilliseconds().toString();
+            while (miliseconds.length < 3) {
+                miliseconds = "0" + miliseconds;
+            }
+
+            var tzminutes = Math.abs(value.getTimezoneOffset());
+            var tzhours = 0;
+
+            while(tzminutes >= 60) {
+                tzhours++;
+                tzminutes -= 60;
+            }
+            tzminutes = (tzminutes.toString().length == 1) ?
+                          "0" + tzminutes.toString() : tzminutes.toString();
+            tzhours = (tzhours.toString().length == 1) ? "0" +
+                                    tzhours.toString() : tzhours.toString();
+            var timezone = ((value.getTimezoneOffset() < 0) ? "+" : "-")
+                                                + tzhours + ":" + tzminutes;
+
+            return (year + "-" + month + "-" + date + "T"
+                    + hours + ":" + minutes + ":" + seconds + "."
+                    + miliseconds + timezone);
+        }
+    }
+
     ,members : {
         __pl : null
         ,get_params: function() {
@@ -102,47 +146,8 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 parent.appendChild(doc.createTextNode(value.toString()));
             }
             else if (value instanceof Date) {
-                var year = value.getFullYear().toString();
-
-                var month = (value.getMonth() + 1).toString();
-                month = (month.length == 1) ? "0" + month : month;
-
-                var date = value.getDate().toString();
-                date = (date.length == 1) ? "0" + date : date;
-
-                var hours = value.getHours().toString();
-                hours = (hours.length == 1) ? "0" + hours : hours;
-
-                var minutes = value.getMinutes().toString();
-                minutes = (minutes.length == 1) ? "0" + minutes : minutes;
-
-                var seconds = value.getSeconds().toString();
-                seconds = (seconds.length == 1) ? "0" + seconds : seconds;
-
-                var miliseconds = value.getMilliseconds().toString();
-                while (miliseconds.length < 3) {
-                    miliseconds = "0" + miliseconds;
-                }
-
-                var tzminutes = Math.abs(value.getTimezoneOffset());
-                var tzhours = 0;
-
-                while(tzminutes >= 60) {
-                    tzhours++;
-                    tzminutes -= 60;
-                }
-                tzminutes = (tzminutes.toString().length == 1) ?
-                              "0" + tzminutes.toString() : tzminutes.toString();
-                tzhours = (tzhours.toString().length == 1) ? "0" +
-                                        tzhours.toString() : tzhours.toString();
-                var timezone = ((value.getTimezoneOffset() < 0) ? "+" : "-")
-                                                    + tzhours + ":" + tzminutes;
-
-                value = year + "-" + month + "-" + date + "T"
-                        + hours + ":" + minutes + ":" + seconds + "."
-                        + miliseconds + timezone;
-
-                parent.appendChild(doc.createTextNode(value));
+                var value_str = soap.Parameters.date_to_iso(value);
+                parent.appendChild(doc.createTextNode(value_str));
             }
             else if (value instanceof Number) {
                 parent.appendChild(doc.createTextNode(value.toString()));

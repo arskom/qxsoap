@@ -123,7 +123,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             return retval;
         }
 
-        ,datetime_isoformat : function(value) {
+        ,parse_datetime_isoformat : function(value) {
             value = value + "";
 
             var ind_dot = value.lastIndexOf(".");
@@ -184,7 +184,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 retval = Number(value + "");
             }
             else if (type_name_l == "datetime") {
-                retval = soap.Client.datetime_isoformat(value);
+                retval = soap.Client.parse_datetime_isoformat(value);
             }
             else if (type_name_l == "string") {
                 retval = value + "";
