@@ -517,8 +517,13 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 type_ns = defn.ns;
             }
 
-            var ret = this.__is_simple_type(type_ns, type_name)
+            var ret = this.__is_simple_type(type_ns, type_name);
             if (ret) {
+                if (ret !== true) {
+                    type_name = ret.base.split(':')[1];
+                    type_ns = ret.base_ns;
+                }
+
                 var value = node.nodeValue;
                 if (value == null) {
                     var first_child = node.firstChild;
