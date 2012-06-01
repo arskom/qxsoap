@@ -95,12 +95,16 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             var child;
 
             if (defn.is_simple_array) {
+                child = parent;
+                parent = parent.parentNode;
+                parent.removeChild(child);
+
                 child_name = defn.name;
 
                 child_defn = this.__get_child_defn(null, cache, 0, defn)
                 for (i=0, l=value.length; i<l; ++i) {
                     child = soap.Client.createSubElementNS(doc, parent, child_name, parent_ns);
-                    this.__serialize(doc, child, value[i], cache, child_defn);
+                    this.__serialize(doc, child, value[i], cache, child_defn, null, child_name);
                 }
             }
             else {
@@ -114,7 +118,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                     }
                     child = soap.Client.createSubElementNS(doc, parent,
                                                                 child_name, ns)
-                    this.__serialize(doc, child, value[i], cache, child_defn);
+                    this.__serialize(doc, child, value[i], cache, child_defn, null, child_name);
                 }
             }
         }
@@ -228,7 +232,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             var child;
             if (child_defn.is_simple_array) {
                 ns = td.ns;
-                child = parent
+                child = soap.Client.createSubElementNS(doc, parent, key, ns);
             }
             else if (td) {
                 ns = td.ns;
@@ -240,7 +244,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 child = soap.Client.createSubElementNS(doc, parent, key, ns);
             }
 
-            this.__serialize(doc, child, data, cache, child_defn, defn, ns);
+            this.__serialize(doc, child, data, cache, child_defn, defn, ns, key);
         }
 
         ,add : function(name, value) {
@@ -287,8 +291,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
 
                         defn = ctx.__get_child_defn(parent_defn, cache, name);
 
-                        ctx.__serialize(doc, child, val, cache, defn,
-                                                                       parent_defn);
+                        ctx.__serialize(doc, child, val, cache, defn, parent_defn);
                     }
                     var value = this.__pl[name];
                     if (cd.is_simple_array && value) {
