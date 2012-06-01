@@ -167,11 +167,11 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
             var child;
             var min_occurs = first_node.getAttribute("minOccurs");
             var max_occurs = first_node.getAttribute("maxOccurs");
+            elt.min_occurs = parseInt(min_occurs);
+            elt.max_occurs = max_occurs;
             if (first_node.nextSibling == null && min_occurs != null
                                                && max_occurs != null) { // it's an array
                 elt.is_array = true;
-                elt.min_occurs = min_occurs;
-                elt.max_occurs = max_occurs;
 
                 child = this.__type_from_node(first_node);
 
@@ -350,6 +350,8 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
             elt.type = node.getAttribute("type");
             elt.name = node.getAttribute("name");
+            elt.min_occurs = parseInt(node.getAttribute("minOccurs"));
+            elt.max_occurs = node.getAttribute("maxOccurs");
             if (ns) {
                 elt.ns = ns;
             }

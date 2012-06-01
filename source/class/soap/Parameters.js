@@ -203,12 +203,20 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             }
         }
 
-        ,__serialize : function(doc, parent, value, cache, defn, parent_defn, parent_ns) {
+        ,__serialize : function(doc, parent, value, cache, defn, parent_defn, parent_ns, name) {
             var t = typeof(value);
             var _ns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
             if (value == null) {
-                soap.Client.setAttributeNS(doc, parent, "xsi:nil", _ns_xsi, 1);
+                if (name && parent_defn.children[name].min_occurs == 0) {
+                    var grand_parent = parent.parentNode;
+                    if (grand_parent) {
+                        grand_parent.removeChild(parent);
+                    }
+                }
+                else {
+                    soap.Client.setAttributeNS(doc, parent, "xsi:nil", _ns_xsi, 1);
+                }
             }
             else if (t == "string") {
                 parent.appendChild(doc.createTextNode(value));
