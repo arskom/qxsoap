@@ -174,7 +174,8 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 retval = value + "" == "true";
             }
             else if (type_name_l == "int" || type_name_l == "long" ||
-                     type_name_l == "integer" || type_name_l == "unsignedlong") {
+                     type_name_l == "integer" || type_name_l == "unsignedlong" ||
+                     type_name_l == "nonnegativeinteger") {
                 retval = parseInt(value + "", 10);
             }
             else if (type_name_l == "double" || type_name_l == "float") {
