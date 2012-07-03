@@ -53,6 +53,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             ,"unsignedlong": "Number"
             ,"nonnegativeinteger": "Number"
 
+            ,"time": "Date"
             ,"datetime": "Date"
             ,"string" : "String"
             ,"anytype": "Document"
@@ -123,41 +124,82 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             return retval;
         }
 
-        ,parse_datetime_isoformat : function(value) {
+        ,parse_time: function(value) {
             value = value + "";
 
-            var ind_dot = value.lastIndexOf(".");
-            var ind_plus = value.lastIndexOf("+");
-
-            var ms = 0;
-            if (ind_dot != -1) {
-                var ms_start_ind = ind_dot + 1;
-                var ms_end_ind = ind_plus;
-                if (ms_end_ind == -1) {
-                    ms_end_ind = value.length
-                }
-                var ms_string = value.substring(ms_start_ind,
-                                                        ms_end_ind);
-                ms = parseInt(ms_string.substring(0,3));
-            }
-
-            value = value.substring(0, (
-                ind_dot == -1 ? (
-                    ind_plus  == -1 ?
-                    value.length :
-                    ind_plus
-                ) :
-                ind_dot));
-
-            value = value.replace(/T/gi," ");
-            value = value.replace(/-/gi,"/");
-            var time_ms = Date.parse(value);
-            time_ms += ms;
+            var time = value.match(/(\d\d):(\d\d):(\d\d)(\.\d+)?/);
 
             var retval = new Date();
-            retval.setTime(time_ms);
+            retval.setYear(0);
+            retval.setMonth(0);
+            retval.setDate(0);
+            retval.setHours( parseInt(time[1]) );
+            retval.setMinutes( parseInt(time[2]) );
+            retval.setSeconds( parseInt(time[3]) );
 
-            return retval
+            return retval;
+        }
+
+        // http://n8v.enteuxis.org/2010/12/parsing-iso-8601-dates-in-javascript/
+        ,parse_datetime_isoformat : function(value) {
+            // parenthese matches:
+            // year month day    hours minutes seconds
+            // dotmilliseconds
+            // tzstring plusminus hours minutes
+            var re = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(\.\d+)?(Z|([+-])?(\d\d)?:?(\d\d)?)/;
+
+            var d = [];
+            d = value.match(re);
+
+            // "2010-12-07T11:00:00.000-09:00" parses to:
+            //  ["2010-12-07T11:00:00.000-09:00", "2010", "12", "07", "11",
+            //     "00", "00", ".000", "-09:00", "-", "09", "00"]
+            // "2010-12-07T11:00:00.000Z" parses to:
+            //  ["2010-12-07T11:00:00.000Z",      "2010", "12", "07", "11",
+            //     "00", "00", ".000", "Z", undefined, undefined, undefined]
+
+            if (! d) {
+                return new Date(Date.parse(value));
+            }
+
+            // parse strings, leading zeros into proper ints
+            var a = [1,2,3,4,5,6,10,11];
+            for (var i in a) {
+                d[a[i]] = parseInt(d[a[i]], 10);
+            }
+            d[7] = parseFloat(d[7]);
+
+            // Date.UTC(year, month[, date[, hrs[, min[, sec[, ms]]]]])
+            // note that month is 0-11, not 1-12
+            // see https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Date/UTC
+            var ms = Date.UTC(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
+
+            // if there are milliseconds, add them
+            if (d[7] > 0) {
+                ms += Math.round(d[7] * 1000);
+            }
+
+            // if there's a timezone, calculate it
+            var offset;
+            if (d[8] == "Z") {
+                offset = 0;
+            }
+            else if (d[10]) {
+                offset = d[10] * 60 * 60 * 1000;
+                if (d[11]) {
+                    offset += d[11] * 60 * 1000;
+                }
+                if (d[9] == "-") {
+                    offset = -1 * offset;
+                }
+            }
+
+            var retval = new Date(ms);
+            if (offset || offset === 0) {
+                ms += offset + (retval.getTimezoneOffset() * 60000);
+            }
+
+            return new Date(retval.getTime() + (retval.getTimezoneOffset() * 60000));
         }
 
         ,from_string: function(type_name, value) {
@@ -186,6 +228,9 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             }
             else if (type_name_l == "datetime") {
                 retval = soap.Client.parse_datetime_isoformat(value);
+            }
+            else if (type_name_l == "time") {
+                retval = soap.Client.parse_time(value);
             }
             else if (type_name_l == "string") {
                 retval = value + "";

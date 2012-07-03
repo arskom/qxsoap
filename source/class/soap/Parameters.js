@@ -151,6 +151,9 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             }
             else if (value instanceof Date) {
                 var value_str = soap.Parameters.date_to_iso(value);
+                if (defn.type.split(":")[1] == "time") {
+                    value_str = value_str.split("T")[1].split(".")[0];
+                }
                 parent.appendChild(doc.createTextNode(value_str));
             }
             else if (value instanceof Number) {
@@ -244,7 +247,10 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             }
             else if (td) {
                 ns = td.ns;
-                child_defn = this.__get_child_defn(defn, cache, key);
+                var root_child_defn = this.__get_child_defn(defn, cache, key);
+                if (root_child_defn != null) {
+                    child_defn = root_child_defn;
+                }
                 child = soap.Client.createSubElementNS(doc, parent, key, ns);
             }
             else {
