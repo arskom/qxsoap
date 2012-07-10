@@ -290,7 +290,6 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
 
         ,__decode_simple_type : function(node, elt) {
             var tn;
-            var _ns_xsd = "http://www.w3.org/2001/XMLSchema";
 
             this.schema[elt.ns].simple[elt.name] = elt
 
