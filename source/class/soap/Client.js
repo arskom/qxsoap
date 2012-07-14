@@ -568,6 +568,14 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 if (ret !== true) {
                     type_name = ret.base.split(':')[1];
                     type_ns = ret.base_ns;
+                    while (type_ns != "http://www.w3.org/2001/XMLSchema") {
+                        var s = this.cache.schema[type_ns]
+                        if (s) {
+                            ret = s.simple[type_name]
+                        }
+                        type_name = ret.base.split(':')[1];
+                        type_ns = ret.base_ns;
+                    }
                 }
 
                 var value = node.nodeValue;
@@ -633,13 +641,33 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                                         defn.children[nn].type.split(":")[1],
                                         defn.children[nn].ns);
                         }
-
-                        if (simple) {
-                            retval[nn] =val;
+                        if (defn.children[nn].is_simple_array) {
+                            if (simple) {
+                                if (retval[nn]) {
+                                    retval[nn].push(val)
+                                }
+                                else {
+                                    retval[nn] = [val];
+                                }
+                            }
+                            else {
+                                var _val = retval["get_" + nn]();
+                                if (_val) {
+                                    _val.push(val);
+                                }
+                                else {
+                                    retval["set_" + nn]([val]);
+                                }
+                            }
                         }
                         else {
-                            var setter = "set_" + nn;
-                            retval[setter](val);
+                            if (simple) {
+                                retval[nn] = val;
+                            }
+                            else {
+                                var setter = "set_" + nn;
+                                retval[setter](val);
+                            }
                         }
                     }
                 }
