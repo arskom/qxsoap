@@ -57,6 +57,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             ,"datetime": "Date"
             ,"string" : "String"
             ,"anytype": "Document"
+            ,"base64binary": "String"
         }
         ,NS_SOAP_ENV: "http://schemas.xmlsoap.org/soap/envelope/"
 
@@ -232,7 +233,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             else if (type_name_l == "time") {
                 retval = soap.Client.parse_time(value);
             }
-            else if (type_name_l == "string") {
+            else if (type_name_l == "string" || type_name_l == "base64binary") {
                 retval = value + "";
             }
             else {
