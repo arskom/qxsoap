@@ -129,7 +129,13 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 var defn = parent_defn;
                 while ( defn.base && (! child_defn)) {
                     defn = cache.schema[defn.base_ns].complex[defn.base];
-                    child_defn = defn.children[child_name];
+                    var child_defn_check = defn.children[child_name];
+                    if (child_defn_check) {
+                        child_defn = child_defn_check;
+                    }
+                    else {
+                        break;
+                    }
                 }
             }
 
