@@ -373,6 +373,13 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             }
         }
 
+        ,simple: function() {
+            var ret = this.__easy.apply(this, arguments);
+            if (ret) {
+                this.callAsync(arguments[0], ret[0], true, ret[1], ret[2]);
+            }
+        }
+
         ,easy_deferred: function() {
             var ret = this.__easy.apply(this, arguments);
 
