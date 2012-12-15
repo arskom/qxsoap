@@ -123,7 +123,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             }
         }
 
-        ,__get_child_defn: function(parent_defn, cache, child_name, child_defn){
+        ,__get_child_defn: function(parent_defn, cache, child_name, child_defn) {
             if (! child_defn) {
                 child_defn = parent_defn.children[child_name]
                 var defn = parent_defn;
@@ -189,7 +189,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             else { // Object or custom function
                 var ctx = this;
 
-                var prop_rec = function (cls, defn) {
+                var prop_rec = function(cls, defn) {
                     if (defn.base) {
                         var super_schema = cache.schema[defn.base_ns];
                         var super_defn = super_schema.complex[defn.base];
@@ -310,7 +310,9 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                                                 name, cache.get_target_namespace());
 
                         defn = ctx.__get_child_defn(parent_defn, cache, name);
-
+                        if (! defn) {
+                            defn = cd;
+                        }
                         ctx.__serialize(doc, child, val, cache, defn, parent_defn);
                     }
                     var value = this.__pl[name];
