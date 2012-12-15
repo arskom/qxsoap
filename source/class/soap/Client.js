@@ -369,14 +369,14 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
         ,easy: function() {
             var ret = this.__easy.apply(this, arguments);
             if (ret) {
-                this.callAsync(arguments[0], ret[0], false, ret[1], ret[2]);
+                this.callAsync(arguments[0], ret[0], false, false, ret[1], ret[2]);
             }
         }
 
         ,simple: function() {
             var ret = this.__easy.apply(this, arguments);
             if (ret) {
-                this.callAsync(arguments[0], ret[0], true, ret[1], ret[2]);
+                this.callAsync(arguments[0], ret[0], true, true, ret[1], ret[2]);
             }
         }
 
@@ -684,30 +684,31 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             return retval;
         }
 
-        ,callAsync : function(method_name, args, simple, callback, errback) {
-            return this.__invoke(method_name, args, true, simple, callback,
-                                                                       errback);
+        ,callAsync : function(method_name, args, simple_request,
+                                            simple_response, callback, errback) {
+            return this.__invoke(method_name, args, true, simple_request,
+                                            simple_response, callback, errback);
         }
 
-        ,__invoke : function(method_name, parameters, async, simple, callback,
-                                                                      errback) {
+        ,__invoke : function(method_name, parameters, async, 
+                            simple_request, simple_response, callback, errback) {
             var retval;
-            this.alter_args(parameters);
+            this.alter_args(parameters, simple_request);
 
             if(async) {
-                this.__load_wsdl(method_name, parameters, async, simple,
-                                                             callback, errback);
+                this.__load_wsdl(method_name, parameters, async,
+                            simple_request, simple_response, callback, errback);
             }
             else {
-                retval = this.__load_wsdl(method_name, parameters, async, simple,
-                                                             callback, errback);
+                retval = this.__load_wsdl(method_name, parameters, async,
+                            simple_request, simple_response, callback, errback);
             }
 
             return retval;
         }
 
-        ,__load_wsdl : function(method_, parameters, async, simple, callback,
-                                                                      errback) {
+        ,__load_wsdl : function(method_, parameters, async,
+                           simple_request, simple_response, callback, errback) {
             var retval;
 
             if(this.cache == null) {
@@ -718,7 +719,8 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                     xmlHttp.onreadystatechange = function() {
                         if(xmlHttp.readyState == 4) {
                             ctx.__on_load_wsdl(method_, parameters, async,
-                                            simple, callback, errback, xmlHttp);
+                                            simple_request, simple_response,
+                                            callback, errback, xmlHttp);
                         }
                     }
                 }
@@ -726,19 +728,20 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 xmlHttp.send(null);
                 if (!async) {
                     retval = this.__on_load_wsdl(method_, parameters, async,
-                                        simple, callback, errback, xmlHttp);
+                                                simple_request, simple_response,
+                                                callback, errback, xmlHttp);
                 }
             }
             else {
                 retval = this.__send_soap_request(method_, parameters, async,
-                                                    simple, callback, errback);
+                            simple_request, simple_response, callback, errback);
             }
 
             return retval;
         }
 
-        ,__on_load_wsdl : function(method_, parameters, async, simple, callback,
-                                                                 errback, req) {
+        ,__on_load_wsdl : function(method_, parameters, async, simple_request,
+                                      simple_response, callback, errback, req) {
             var wsdl = req.responseXML;
             var retval;
 
@@ -748,14 +751,14 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             else {
                 this.cache = new soap.WsdlCache(wsdl);
                 retval = this.__send_soap_request(method_, parameters, async,
-                                                     simple, callback, errback);
+                            simple_request, simple_response, callback, errback);
             }
 
             return retval;
         }
 
-        ,__send_soap_request : function(method_name, parameters, async, simple,
-                                                            callback, errback) {
+        ,__send_soap_request : function(method_name, parameters, async,
+                            simple_request, simple_response, callback, errback) {
             var _ns_tns = this.cache.get_target_namespace();
 
             var sub_element = soap.Client.createSubElementNS;
@@ -765,7 +768,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             var doc = qx.xml.Document.create()
             var envelope = sub_element(doc, doc,"Envelope",
                                                        soap.Client.NS_SOAP_ENV);
-            parameters.to_xml(doc, envelope, this.cache, method_name);
+            parameters.to_xml(doc, envelope, this.cache, method_name, simple_request);
 
             // send request
             var xml_http = qx.io.remote.transport.XmlHttp.createRequestObject();
@@ -780,7 +783,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 var ctx = this;
                 xml_http.onreadystatechange = function() {
                     if(xml_http.readyState == 4) { /* FIXME: No magic numbers! */
-                        ctx.__on_send_soap_request(method_name, async, simple,
+                        ctx.__on_send_soap_request(method_name, async, simple_response,
                                                     callback, errback, xml_http);
                     }
                 }
@@ -788,7 +791,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
             xml_http.send(qx.xml.Element.serialize(doc));
             if (!async) {
-                retval = this.__on_send_soap_request(method_name, async, simple,
+                retval = this.__on_send_soap_request(method_name, async, simple_response,
                                                     callback, errback, xml_http);
             }
 

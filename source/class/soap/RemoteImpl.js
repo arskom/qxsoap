@@ -76,7 +76,7 @@ qx.Class.define("soap.RemoteImpl", { extend : qx.ui.table.model.Remote
             }
 
             svc.callAsync(this.__count_method_name, args,
-                true, function(r) {
+                false, true, function(r) {
                     ctx.__count_request_sent = false;
                     ctx._onRowCountLoaded(r);
                 });
@@ -103,8 +103,8 @@ qx.Class.define("soap.RemoteImpl", { extend : qx.ui.table.model.Remote
             args.set_soap_req_header(header);
 
             // issue soap call
-            svc.callAsync(this.__data_method_name, args,
-                true, function(r) {
+            svc.callAsync(this.__data_method_name, args, false, true,
+                function(r) {
                     if (r) {
                         if (ctx.getMapper() != null) {
                             ctx.getMapper()(r);
