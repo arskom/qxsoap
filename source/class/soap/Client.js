@@ -216,9 +216,12 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             else if (type_name_l == "boolean") {
                 retval = value + "" == "true";
             }
-            else if (type_name_l == "int" || type_name_l == "long" ||
-                     type_name_l == "integer" || type_name_l == "unsignedlong" ||
-                     type_name_l == "nonnegativeinteger") {
+            else if (type_name_l == "integer" || type_name_l == "nonnegativeinteger" ||
+                     type_name_l == "long" || type_name_l == "unsignedlong" ||
+                     type_name_l == "int" || type_name_l == "unsignedint" ||
+                     type_name_l == "short" || type_name_l == "unsignedshort" ||
+                     type_name_l == "byte" || type_name_l == "unsignedbyte"
+                    ) {
                 retval = parseInt(value + "", 10);
             }
             else if (type_name_l == "double" || type_name_l == "float") {
