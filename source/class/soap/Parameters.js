@@ -302,7 +302,7 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
             var parent_defn = cache.schema[_ns_tns].complex[method_name];
 
             var i=0;
-            if (parent_defn.children) {
+            if (parent_defn && parent_defn.children) {
                 var cd = parent_defn.children[i];
                 while (cd) {
                     var name = cd.name;

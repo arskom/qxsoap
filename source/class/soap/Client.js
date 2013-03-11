@@ -45,7 +45,6 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             ,"decimal": "Number"
             ,"byte": "Number"
             ,"short": "Number"
-            ,"int": "Number"
             ,"long": "Number"
             ,"unsignedbyte": "Number"
             ,"unsignedshort": "Number"
