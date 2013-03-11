@@ -36,20 +36,19 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
     ,statics : {
         TYPE_MAP : {
              "boolean": "Boolean"
-            ,"int": "Integer"
-            ,"long": "Integer"
-            ,"integer": "Integer"
 
             ,"double": "Number"
             ,"float": "Number"
             ,"decimal": "Number"
             ,"byte": "Number"
-            ,"short": "Number"
-            ,"long": "Number"
             ,"unsignedbyte": "Number"
+            ,"short": "Number"
             ,"unsignedshort": "Number"
+            ,"int": "Integer"
             ,"unsignedint": "Number"
+            ,"long": "Number"
             ,"unsignedlong": "Number"
+            ,"integer": "Integer"
             ,"nonnegativeinteger": "Number"
 
             ,"time": "Date"
