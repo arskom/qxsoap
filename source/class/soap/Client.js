@@ -514,11 +514,13 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
                 }
             }
             else {
-                var props = qx.util.PropertyUtil.getAllProperties(
+                if (retval !== null) {
+                    var props = qx.util.PropertyUtil.getAllProperties(
                                                             retval.constructor);
-                for (k in props) {
-                    if (props.hasOwnProperty(k)) {
-                        return retval["get" + k]();
+                    for (k in props) {
+                        if (props.hasOwnProperty(k)) {
+                            return retval["get" + k]();
+                        }
                     }
                 }
             }
@@ -562,6 +564,9 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             }
 
             if (! type_name) {
+                if (! defn) {
+                    return null;
+                }
                 type_name = defn.type;
                 if (type_name) {
                     type_name = type_name.split(':')[1];
