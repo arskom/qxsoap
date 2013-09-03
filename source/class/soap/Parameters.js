@@ -160,6 +160,9 @@ qx.Class.define("soap.Parameters", {extend : qx.core.Object
                 if (defn.type.split(":")[1] == "time") {
                     value_str = value_str.split("T")[1].split(".")[0];
                 }
+                else if (defn.type.split(":")[1] == "date") {
+                    value_str = value_str.split("T")[0];
+                }
                 parent.appendChild(doc.createTextNode(value_str));
             }
             else if (value instanceof Number) {
