@@ -53,6 +53,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
 
             ,"time": "Date"
             ,"datetime": "Date"
+            ,"date": "Date"
             ,"string" : "String"
             ,"anytype": "Document"
             ,"base64binary": "String"
@@ -228,7 +229,7 @@ qx.Class.define("soap.Client", {extend : qx.core.Object
             else if (type_name_l == "decimal") {
                 retval = Number(value + "");
             }
-            else if (type_name_l == "datetime") {
+            else if (type_name_l == "datetime" || type_name_l == "date") {
                 retval = soap.Client.parse_datetime_isoformat(value);
             }
             else if (type_name_l == "time") {
