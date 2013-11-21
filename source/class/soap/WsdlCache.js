@@ -327,7 +327,12 @@ qx.Class.define("soap.WsdlCache", {extend: qx.core.Object
                                 }
                             }
                             else {
-                                value = soap.Client.from_string(elt.type.split(":")[1], value);
+                                if (elt.type.indexOf(":") > -1) {
+                                    value = soap.Client.from_string(elt.type.split(":")[1], value);
+                                }
+                                else {
+                                    value = soap.Client.from_string(elt.type, value);
+                                }
                             }
                             elt.restrictions.values.push(value);
                         }
